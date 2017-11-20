@@ -186,21 +186,21 @@
         margin-top: 0;
         @include float(right);
         position: relative;
-        top: -($baseline-v/2) - 2;
+        top: -($baseline-v) - 12;
       }
 
       @include media($bp-dl) {
         margin-top: 0;
         @include float(right);
         position: relative;
-        top: -($baseline-v/2) - 2;
+        top: -($baseline-v) - 12;
       }
 
       @include media($bp-dx) {
         margin-top: 0;
         @include float(right);
         position: relative;
-        top: -($baseline-v/2) - 2;
+        top: -($baseline-v) - 12;
       }
 
       .step__status__value {

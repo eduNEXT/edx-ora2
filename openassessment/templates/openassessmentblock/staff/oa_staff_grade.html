@@ -12,17 +12,16 @@
                 <span class="wrapper--copy">
                     <span class="step__label">{% trans "Staff Grade" %} </span>
                 </span>
-            </button>
-
-            <span class="step__status">
-              <span class="step__status__value">
-                  {% if icon_class %}
-                  <span class="icon fa {{ icon_class }}" aria-hidden="true"></span>
-                  {% endif %}
-                  <span class="copy">{{ status_value }}</span>
-              </span>
-            </span>
+            </button>            
         </h4>
+        <span class="step__status">
+          <span class="step__status__value">
+              {% if icon_class %}
+              <span class="icon fa {{ icon_class }}" aria-hidden="true"></span>
+              {% endif %}
+              <span class="copy">{{ status_value }}</span>
+          </span>
+        </span>
     </header>
 
     {% if message_title %}
