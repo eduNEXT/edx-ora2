@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import mimetypes
 
 from django.conf import settings
 from django.shortcuts import HttpResponse, Http404
@@ -43,7 +44,8 @@ def download_file(key):
         content_type = metadata.get("Content-Type", 'application/octet-stream')
     with open(file_path, 'r') as f:
         response = HttpResponse(f.read(), content_type=content_type)
-        file_name = os.path.basename(os.path.dirname(file_path))
+        extension = mimetypes.guess_extension(content_type)
+        file_name = os.path.basename(os.path.dirname(file_path)) + extension
         response['Content-Disposition'] = 'attachment; filename=' + file_name
     return response
 
