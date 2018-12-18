@@ -701,7 +701,8 @@
                     "start": "2014-03-03",
                     "due": "2015-04-05"
                 }
-            ]
+            ],
+            "date_format": "c"
         },
         "output": "oa_staff_area.html"
     },
@@ -735,7 +736,8 @@
                     "start": "2014-03-03",
                     "due": "2015-04-05"
                 }
-            ]
+            ],
+            "date_format": "c"
         },
         "output": "oa_staff_area_full_grading.html"
     },
@@ -769,7 +771,8 @@
                     "start": "2014-03-03",
                     "due": "2015-04-05"
                 }
-            ]
+            ],
+            "date_format": "c"
         },
         "output": "oa_staff_area_full_grading_2.html"
     },
@@ -1234,7 +1237,8 @@
             "save_status": "This response has not been saved.",
             "submit_enabled": true,
             "submission_due": "2020-01-01T00:00",
-            "xblock_id": "b1436dfc-5c65-11e7-b5b2-080027880ca6"
+            "xblock_id": "b1436dfc-5c65-11e7-b5b2-080027880ca6",
+            "date_format": "c"
         },
         "output": "oa_response_date.html"
     },

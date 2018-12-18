@@ -11,6 +11,7 @@ import pytz
 from mock import Mock, patch, MagicMock, PropertyMock
 from lxml import etree
 from StringIO import StringIO
+from django.test.utils import override_settings
 
 from openassessment.xblock import openassessmentblock
 from openassessment.xblock.resolve_dates import DISTANT_PAST, DISTANT_FUTURE
@@ -185,6 +186,7 @@ class TestOpenAssessment(XBlockHandlerTestCase):
     @ddt.data(('utc', '2014-04-01T00:00:00+00:00'),
               ('America/Los_Angeles', '2014-04-01T00:00:00+00:00'))
     @ddt.unpack
+    @override_settings(SHORT_DATETIME_FORMAT='c')
     def test_load_student_view_with_dates(self, time_zone, expected_date):
         """OA XBlock returns some HTML to the user.
 

@@ -17,7 +17,7 @@ describe('OpenAssessment.DateTimeFactory', function() {
             $('.ora-datetime', timeElement).each(function() {
                 var self = this;
                 expect($(self).data('datetime')).toBe('2020-01-01T00:00:00+00:00');
-                expect($(self).data('string')).toContain('due {date}');
+                expect($(self).data('string')).toContain('due 2020-01-01T00:00:00+00:00');
             });
         });
     });

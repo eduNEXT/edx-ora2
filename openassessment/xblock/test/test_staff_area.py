@@ -136,12 +136,12 @@ class TestCourseStaff(XBlockHandlerTestCase):
         self.assertNotIn(u'staff-info', xblock_fragment.body_html())
 
     @scenario('data/staff_dates_scenario.xml', user_id='Bob')
+    @override_settings(SHORT_DATETIME_FORMAT='N j, Y H:i e')
     def test_staff_area_dates_table(self, xblock):
         # Simulate that we are course staff
         xblock.xmodule_runtime = self._create_mock_runtime(
             xblock.scope_ids.usage_id, True, False, "Bob"
         )
-
         # Verify that we can render without error
         resp = self.request(xblock, 'render_staff_area', json.dumps({}))
         decoded_response = resp.decode('utf-8').lower()

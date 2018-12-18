@@ -11,6 +11,7 @@ from django.test.utils import override_settings
 from mock import patch, Mock
 from moto import mock_s3
 import pytz
+from django.conf import settings
 
 from submissions import api as sub_api
 from submissions.api import SubmissionRequestError, SubmissionInternalError
@@ -266,7 +267,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'submission_start': dt.datetime(4999, 4, 1).replace(tzinfo=pytz.utc),
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -292,7 +294,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'self_incomplete': True,
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -314,7 +317,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'submission_due': dt.datetime(2999, 5, 6).replace(tzinfo=pytz.utc),
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -335,7 +339,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'submit_enabled': False,
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -362,7 +367,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'submission_due': dt.datetime(2999, 5, 6).replace(tzinfo=pytz.utc),
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -389,7 +395,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'submission_due': dt.datetime(2999, 5, 6).replace(tzinfo=pytz.utc),
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -411,7 +418,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'self_incomplete': True,
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -446,7 +454,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                     'cancelled_by': mock_staff
                 },
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -475,7 +484,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'self_incomplete': True,
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -490,7 +500,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'submission_due': dt.datetime(2014, 4, 5).replace(tzinfo=pytz.utc),
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -512,7 +523,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'self_incomplete': True,
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -540,7 +552,8 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'file_upload_type': None,
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
@@ -568,11 +581,13 @@ class SubmissionRenderTest(XBlockHandlerTestCase):
                 'file_upload_type': None,
                 'allow_latex': False,
                 'user_timezone': None,
-                'user_language': None
+                'user_language': None,
+                'date_format': settings.SHORT_DATETIME_FORMAT,
             }
         )
 
     @scenario('data/submission_open.xml', user_id="Bob")
+    @override_settings(SHORT_DATETIME_FORMAT='c')
     def test_integration(self, xblock):
         # Expect that the response step is open and displays the deadline
         resp = self.request(xblock, 'render_submission', json.dumps(dict()))
