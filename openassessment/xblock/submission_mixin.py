@@ -4,6 +4,7 @@ import logging
 from xblock.core import XBlock
 
 from submissions import api
+from django.conf import settings
 from openassessment.fileupload import api as file_upload_api
 from openassessment.fileupload.exceptions import FileUploadError
 from openassessment.workflow.errors import AssessmentWorkflowError
@@ -498,6 +499,7 @@ class SubmissionMixin(object):
             "xblock_id": self.get_xblock_id(),
             "text_response": self.text_response,
             "file_upload_response": self.file_upload_response,
+            "date_format": settings.SHORT_DATETIME_FORMAT,
         }
 
         # Due dates can default to the distant future, in which case

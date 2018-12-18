@@ -7,6 +7,7 @@ from functools import wraps
 import logging
 
 from xblock.core import XBlock
+from django.conf import settings
 from openassessment.assessment.errors import (
     PeerAssessmentInternalError,
 )
@@ -173,6 +174,7 @@ class StaffAreaMixin(object):
             )
 
         context['xblock_id'] = self.get_xblock_id()
+        context['date_format'] = settings.SHORT_DATETIME_FORMAT
         return path, context
 
     @staticmethod
