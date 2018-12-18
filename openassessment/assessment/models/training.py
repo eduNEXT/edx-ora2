@@ -7,8 +7,6 @@ from django.core.cache import cache
 from django.db import models
 from .base import Rubric, CriterionOption
 
-from openassessment.xblock.data_conversion import LazyEncoder
-
 
 class TrainingExample(models.Model):
     """
@@ -48,7 +46,7 @@ class TrainingExample(models.Model):
         content_hash = cls.calculate_hash(answer, options_selected, rubric)
         example = TrainingExample.objects.create(
             content_hash=content_hash,
-            raw_answer=json.dumps(answer, cls=LazyEncoder),
+            raw_answer=json.dumps(answer),
             rubric=rubric
         )
 
@@ -132,7 +130,7 @@ class TrainingExample(models.Model):
             'answer': answer,
             'options_selected': options_selected,
             'rubric': rubric.id
-        }, cls=LazyEncoder)
+        })
         return sha1(contents).hexdigest()
 
     @classmethod

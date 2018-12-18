@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
 
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import ugettext
 
 
-DEFAULT_PROMPT = ugettext_lazy("""
+DEFAULT_PROMPT = ugettext("""
     Censorship in the Libraries
 
     'All of us can think of a book that we hope none of our children or any other children have taken off the shelf. But if I have the right to remove that book from the shelf -- that work I abhor -- then you also have exactly the same right and so does everyone else. And then we have no books left on the shelf for any of us.' --Katherine Paterson, Author
@@ -18,46 +18,46 @@ DEFAULT_PROMPT = ugettext_lazy("""
 DEFAULT_RUBRIC_CRITERIA = [
     {
         'name': "Ideas",
-        'label': ugettext_lazy("Ideas"),
-        'prompt': ugettext_lazy("Determine if there is a unifying theme or main idea."),
+        'label': ugettext("Ideas"),
+        'prompt': ugettext("Determine if there is a unifying theme or main idea."),
         'order_num': 0,
-        'feedback': ugettext_lazy('optional'),
+        'feedback': ugettext('optional'),
         'options': [
             {
-                'order_num': 0, 'points': 0, 'name': 'Poor', 'label': ugettext_lazy('Poor'),
-                'explanation': ugettext_lazy("""Difficult for the reader to discern the main idea.  Too brief or too repetitive to establish or maintain a focus.""")
+                'order_num': 0, 'points': 0, 'name': 'Poor', 'label': ugettext('Poor'),
+                'explanation': ugettext("""Difficult for the reader to discern the main idea.  Too brief or too repetitive to establish or maintain a focus.""")
             },
             {
-                'order_num': 1, 'points': 3, 'name': 'Fair', 'label': ugettext_lazy('Fair'),
-                'explanation': ugettext_lazy("""Presents a unifying theme or main idea, but may include minor tangents.  Stays somewhat focused on topic and task.""")
+                'order_num': 1, 'points': 3, 'name': 'Fair', 'label': ugettext('Fair'),
+                'explanation': ugettext("""Presents a unifying theme or main idea, but may include minor tangents.  Stays somewhat focused on topic and task.""")
             },
             {
-                'order_num': 2, 'points': 5, 'name': 'Good', 'label': ugettext_lazy('Good'),
-                'explanation': ugettext_lazy("""Presents a unifying theme or main idea without going off on tangents.  Stays completely focused on topic and task.""")
+                'order_num': 2, 'points': 5, 'name': 'Good', 'label': ugettext('Good'),
+                'explanation': ugettext("""Presents a unifying theme or main idea without going off on tangents.  Stays completely focused on topic and task.""")
             },
         ],
     },
     {
         'name': "Content",
-        'label': ugettext_lazy("Content"),
-        'prompt': ugettext_lazy("Assess the content of the submission"),
+        'label': ugettext("Content"),
+        'prompt': ugettext("Assess the content of the submission"),
         'order_num': 1,
         'options': [
             {
-                'order_num': 0, 'points': 0, 'name': 'Poor', 'label': ugettext_lazy('Poor'),
-                'explanation': ugettext_lazy("""Includes little information with few or no details or unrelated details.  Unsuccessful in attempts to explore any facets of the topic.""")
+                'order_num': 0, 'points': 0, 'name': 'Poor', 'label': ugettext('Poor'),
+                'explanation': ugettext("""Includes little information with few or no details or unrelated details.  Unsuccessful in attempts to explore any facets of the topic.""")
             },
             {
-                'order_num': 1, 'points': 1, 'name': 'Fair', 'label': ugettext_lazy('Fair'),
-                'explanation': ugettext_lazy("""Includes little information and few or no details.  Explores only one or two facets of the topic.""")
+                'order_num': 1, 'points': 1, 'name': 'Fair', 'label': ugettext('Fair'),
+                'explanation': ugettext("""Includes little information and few or no details.  Explores only one or two facets of the topic.""")
             },
             {
-                'order_num': 2, 'points': 3, 'name': 'Good', 'label': ugettext_lazy('Good'),
-                'explanation': ugettext_lazy("""Includes sufficient information and supporting details. (Details may not be fully developed; ideas may be listed.)  Explores some facets of the topic.""")
+                'order_num': 2, 'points': 3, 'name': 'Good', 'label': ugettext('Good'),
+                'explanation': ugettext("""Includes sufficient information and supporting details. (Details may not be fully developed; ideas may be listed.)  Explores some facets of the topic.""")
             },
             {
-                'order_num': 3, 'points': 3, 'name': 'Excellent', 'label': ugettext_lazy('Excellent'),
-                'explanation': ugettext_lazy("""Includes in-depth information and exceptional supporting details that are fully developed.  Explores all facets of the topic.""")
+                'order_num': 3, 'points': 3, 'name': 'Excellent', 'label': ugettext('Excellent'),
+                'explanation': ugettext("""Includes in-depth information and exceptional supporting details that are fully developed.  Explores all facets of the topic.""")
             },
         ],
     },
@@ -65,26 +65,26 @@ DEFAULT_RUBRIC_CRITERIA = [
 
 # The rubric's feedback prompt is a set of instructions letting the student
 # know they can provide additional free form feedback in their assessment.
-DEFAULT_RUBRIC_FEEDBACK_PROMPT = ugettext_lazy("""
+DEFAULT_RUBRIC_FEEDBACK_PROMPT = ugettext("""
 (Optional) What aspects of this response stood out to you? What did it do well? How could it be improved?
 """)
 
 
 # The rubric's feedback text is the default text displayed and used as
 # the student's response to the feedback prompt
-DEFAULT_RUBRIC_FEEDBACK_TEXT = ugettext_lazy("""
+DEFAULT_RUBRIC_FEEDBACK_TEXT = ugettext("""
 I think that this response...
 """)
 
 DEFAULT_EXAMPLE_ANSWER = (
-    ugettext_lazy("Replace this text with your own sample response for this assignment. "
+    ugettext("Replace this text with your own sample response for this assignment. "
     "Then, under Response Score to the right, select an option for each criterion. "
     "Learners practice performing peer assessments by assessing this response and comparing "
     "the options that they select in the rubric with the options that you specified.")
 )
 
 DEFAULT_EXAMPLE_ANSWER_2 = (
-    ugettext_lazy("Replace this text with another sample response, "
+    ugettext("Replace this text with another sample response, "
     "and then specify the options that you would select for this response.")
 )
 
