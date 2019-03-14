@@ -33,6 +33,7 @@ class Backend(BaseBackend):
         Upload the given file content to the keyed location.
         """
         path = self._get_file_path(key)
+        import ipdb; ipdb.set_trace()
         saved_path = default_storage.save(path, ContentFile(content))
         return saved_path
 
