@@ -324,6 +324,7 @@ class SubmissionMixin(object):
 
         """
         file_num = int(data.get('filenum', 0))
+        import ipdb; ipdb.set_trace()
         return {'success': True, 'url': self._get_download_url(file_num)}
 
     @XBlock.json_handler
