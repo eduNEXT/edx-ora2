@@ -36,7 +36,7 @@ class Backend(BaseBackend):
             'key': key,
             'file_ext': self.ALLOWED_FILE_TYPES[content_type.lower()],
         }
-        import ipdb; ipdb.set_trace()
+
         return reverse("openassessment-django-storage", kwargs=parameters)
 
     def get_download_url(self, key):
@@ -45,12 +45,17 @@ class Backend(BaseBackend):
 
         Returns None if no file exists at that location.
         """
-        import ipdb; ipdb.set_trace()
         path = self._get_file_path(key)
+
+        # Loops over ALLOWED_FILE_TYPES values to find the correct extension type.
         for ext in self.ALLOWED_FILE_TYPES.values():
             path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
             if default_storage.exists(path_with_ext):
                 return default_storage.url(path_with_ext)
+
+        # If not extension match, returns the key without extension.
+        if default_storage.exists(path):
+            return default_storage.url(path)
         return None
 
     def upload_file(self, key, content):
