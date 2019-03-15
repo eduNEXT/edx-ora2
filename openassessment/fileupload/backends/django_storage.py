@@ -36,7 +36,6 @@ class Backend(BaseBackend):
             'key': key,
             'file_ext': self.ALLOWED_FILE_TYPES[content_type.lower()],
         }
-        import ipdb; ipdb.set_trace()
 
         return reverse("openassessment-django-storage", kwargs=parameters)
 
@@ -47,7 +46,7 @@ class Backend(BaseBackend):
         Returns None if no file exists at that location.
         """
         path = self._get_file_path(key)
-        import ipdb; ipdb.set_trace()
+
         # Loops over ALLOWED_FILE_TYPES values to find the correct extension type.
         for ext in self.ALLOWED_FILE_TYPES.values():
             path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
