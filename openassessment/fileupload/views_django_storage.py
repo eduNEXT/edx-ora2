@@ -14,7 +14,6 @@ def django_storage(request, key, file_ext):
     """
     Upload files using django storage backend.
     """
-    import ipdb; ipdb.set_trace()
-    key_file_ext = '{key}.{ext}'.format(key=key, ext=file_ext)
+    key_file_ext = '{key}{ext}'.format(key=key, ext=file_ext)
     Backend().upload_file(key_file_ext, request.body)
     return HttpResponse()

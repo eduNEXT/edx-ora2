@@ -13,19 +13,19 @@ class Backend(BaseBackend):
     """
 
     ALLOWED_FILE_TYPES = {
-        'image/gif': 'gif',
-        'image/jpeg': 'jpeg',
-        'image/pjpeg': 'pjpeg',
-        'image/png': 'png',
-        'application/pdf': 'pdf',
-        'application/msword': 'doc',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
-        'text/csv': 'csv',
-        'application/vnd.ms-powerpoint': 'ppt',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
-        'text/plain': 'txt',
-        'application/vnd.ms-excel': 'xls',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+        'image/gif': '.gif',
+        'image/jpeg': '.jpeg',
+        'image/pjpeg': '.pjpeg',
+        'image/png': '.png',
+        'application/pdf': '.pdf',
+        'application/msword': '.doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+        'text/csv': '.csv',
+        'application/vnd.ms-powerpoint': '.ppt',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+        'text/plain': '.txt',
+        'application/vnd.ms-excel': '.xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
     }
 
     def get_upload_url(self, key, content_type):
@@ -34,7 +34,7 @@ class Backend(BaseBackend):
         """
         parameters = {
             'key': key,
-            'file_ext': self.ALLOWED_FILE_TYPES[content_type]
+            'file_ext': self.ALLOWED_FILE_TYPES[content_type.lower()],
         }
         import ipdb; ipdb.set_trace()
         return reverse("openassessment-django-storage", kwargs=parameters)
@@ -47,8 +47,10 @@ class Backend(BaseBackend):
         """
         import ipdb; ipdb.set_trace()
         path = self._get_file_path(key)
-        if default_storage.exists(path):
-            return default_storage.url(path)
+        for ext in self.ALLOWED_FILE_TYPES.values():
+            path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
+            if default_storage.exists(path_with_ext):
+                return default_storage.url(path_with_ext)
         return None
 
     def upload_file(self, key, content):
