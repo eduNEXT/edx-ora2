@@ -34,7 +34,7 @@ class Backend(BaseBackend):
         """
         parameters = {
             'key': key,
-            'ext': self.ALLOWED_FILE_TYPES[content_type]
+            'file_ext': self.ALLOWED_FILE_TYPES[content_type]
         }
         import ipdb; ipdb.set_trace()
         return reverse("openassessment-django-storage", kwargs=parameters)
