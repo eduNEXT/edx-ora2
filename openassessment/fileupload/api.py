@@ -12,6 +12,7 @@ def get_upload_url(key, content_type):
     """
     Returns a url (absolute or relative, depending on the endpoint) which can be used to upload a file to.
     """
+    import ipdb; ipdb.set_trace()
     return backends.get_backend().get_upload_url(key, content_type)
 
 
