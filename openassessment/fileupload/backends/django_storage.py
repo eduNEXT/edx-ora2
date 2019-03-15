@@ -11,11 +11,33 @@ class Backend(BaseBackend):
     """
     Manage openassessment student files uploaded using the default django storage settings.
     """
+
+    ALLOWED_FILE_TYPES = {
+        'image/gif': 'gif',
+        'image/jpeg': 'jpeg',
+        'image/pjpeg': 'pjpeg',
+        'image/png': 'png',
+        'application/pdf': 'pdf',
+        'application/msword': 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        'text/csv': 'csv',
+        'application/vnd.ms-powerpoint': 'ppt',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+        'text/plain': 'txt',
+        'application/vnd.ms-excel': 'xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+    }
+
     def get_upload_url(self, key, content_type):
         """
         Return the URL pointing to the ORA2 django storage upload endpoint.
         """
-        return reverse("openassessment-django-storage", kwargs={'key': key})
+        parameters = {
+            'key': key,
+            'ext': self.ALLOWED_FILE_TYPES[content_type]
+        }
+        import ipdb; ipdb.set_trace()
+        return reverse("openassessment-django-storage", kwargs=parameters)
 
     def get_download_url(self, key):
         """
@@ -33,7 +55,6 @@ class Backend(BaseBackend):
         Upload the given file content to the keyed location.
         """
         path = self._get_file_path(key)
-        import ipdb; ipdb.set_trace()
         saved_path = default_storage.save(path, ContentFile(content))
         return saved_path
 

@@ -286,7 +286,6 @@ class SubmissionMixin(object):
             A URL to be used to upload content associated with this submission.
 
         """
-        import ipdb; ipdb.set_trace()
         if 'contentType' not in data or 'filename' not in data:
             return {'success': False, 'msg': self._(u"There was an error uploading your file.")}
         content_type = data['contentType']
@@ -325,7 +324,6 @@ class SubmissionMixin(object):
 
         """
         file_num = int(data.get('filenum', 0))
-        import ipdb; ipdb.set_trace()
         return {'success': True, 'url': self._get_download_url(file_num)}
 
     @XBlock.json_handler
