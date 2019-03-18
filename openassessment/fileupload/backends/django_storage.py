@@ -78,7 +78,7 @@ class Backend(BaseBackend):
         Returns False if the file does not exist, and so was not removed.
         """
         path = self._get_file_path(key)
-
+        import ipdb; ipdb.set_trace()
         # Loops over ALLOWED_FILE_TYPES values to find and delete the correct file.
         for ext in self.ALLOWED_FILE_TYPES.values():
             path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
