@@ -4,6 +4,7 @@ Django-storage backend module.
 
 import os
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.urlresolvers import reverse
@@ -16,29 +17,14 @@ class Backend(BaseBackend):
     Manage openassessment student files uploaded using the default django storage settings.
     """
 
-    ALLOWED_FILE_TYPES = {
-        'image/gif': '.gif',
-        'image/jpeg': '.jpeg',
-        'image/pjpeg': '.pjpeg',
-        'image/png': '.png',
-        'application/pdf': '.pdf',
-        'application/msword': '.doc',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-        'text/csv': '.csv',
-        'application/vnd.ms-powerpoint': '.ppt',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
-        'text/plain': '.txt',
-        'application/vnd.ms-excel': '.xls',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
-    }
-
     def get_upload_url(self, key, content_type):
         """
         Return the URL pointing to the ORA2 django storage upload endpoint.
         """
+        allowed_file_types = get_allowed_file_types()
         parameters = {
             'key': key,
-            'file_ext': self.ALLOWED_FILE_TYPES[content_type.lower()],
+            'file_ext': allowed_file_types[content_type.lower()],
         }
 
         return reverse("openassessment-django-storage", kwargs=parameters)
@@ -51,8 +37,8 @@ class Backend(BaseBackend):
         """
         path = self._get_file_path(key)
 
-        # Loops over ALLOWED_FILE_TYPES values to find the correct extension type.
-        for ext in self.ALLOWED_FILE_TYPES.values():
+        # Loops over EDX_ORA_ALLOWED_FILE_TYPES values to find the correct extension type.
+        for ext in get_allowed_file_types().values():
             path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
             if default_storage.exists(path_with_ext):
                 return default_storage.url(path_with_ext)
@@ -79,8 +65,8 @@ class Backend(BaseBackend):
         """
         path = self._get_file_path(key)
 
-        # Loops over ALLOWED_FILE_TYPES values to find and delete the correct file.
-        for ext in self.ALLOWED_FILE_TYPES.values():
+        # Loops over EDX_ORA_ALLOWED_FILE_TYPES values to find and delete the correct file.
+        for ext in get_allowed_file_types().values():
             path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
             if default_storage.exists(path_with_ext):
                 default_storage.delete(path_with_ext)
@@ -109,3 +95,11 @@ class Backend(BaseBackend):
         """
         path = self._get_key_name(self._get_file_name(key))
         return path
+
+
+def get_allowed_file_types():
+    """
+    Return the allowed file types from edx-ora2 base settings.
+    """
+    file_types = getattr(settings, 'EDX_ORA_ALLOWED_FILE_TYPES', None)
+    return file_types
