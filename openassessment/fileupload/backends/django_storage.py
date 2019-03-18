@@ -101,5 +101,6 @@ def get_allowed_file_types():
     """
     Return the allowed file types from edx-ora2 base settings.
     """
+    import ipdb; ipdb.set_trace()
     file_types = getattr(settings, 'EDX_ORA_ALLOWED_FILE_TYPES', None)
     return file_types
