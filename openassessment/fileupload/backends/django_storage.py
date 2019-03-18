@@ -85,7 +85,6 @@ class Backend(BaseBackend):
             if default_storage.exists(path_with_ext):
                 default_storage.delete(path_with_ext)
                 return True
-            return False
 
         # If not extension match, find and delete the key value without extension.
         if default_storage.exists(path):
