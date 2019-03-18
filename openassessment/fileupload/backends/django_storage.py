@@ -1,3 +1,7 @@
+"""
+Django-storage backend module.
+"""
+
 import os
 
 from django.core.files.base import ContentFile
@@ -74,6 +78,16 @@ class Backend(BaseBackend):
         Returns False if the file does not exist, and so was not removed.
         """
         path = self._get_file_path(key)
+
+        # Loops over ALLOWED_FILE_TYPES values to find and delete the correct file.
+        for ext in self.ALLOWED_FILE_TYPES.values():
+            path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
+            if default_storage.exists(path_with_ext):
+                default_storage.delete(path_with_ext)
+                return True
+            return False
+
+        # If not extension match, find and delete the key value without extension.
         if default_storage.exists(path):
             default_storage.delete(path)
             return True
