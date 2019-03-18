@@ -139,19 +139,3 @@ BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 LOCALE_PATHS = [os.path.join(BASE_DIR, "openassessment", "locale")]
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-EDX_ORA_ALLOWED_FILE_TYPES = {
-    'image/gif': '.gif',
-    'image/jpeg': '.jpeg',
-    'image/pjpeg': '.pjpeg',
-    'image/png': '.png',
-    'application/pdf': '.pdf',
-    'application/msword': '.doc',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-    'text/csv': '.csv',
-    'application/vnd.ms-powerpoint': '.ppt',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
-    'text/plain': '.txt',
-    'application/vnd.ms-excel': '.xls',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
-}

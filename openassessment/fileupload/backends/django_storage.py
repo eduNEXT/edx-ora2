@@ -2,6 +2,8 @@
 Django-storage backend module.
 """
 
+import json
+import mimetypes
 import os
 
 from django.conf import settings
@@ -16,15 +18,16 @@ class Backend(BaseBackend):
     """
     Manage openassessment student files uploaded using the default django storage settings.
     """
+    METADATA_FILE_EXTENSION = '.meta'
 
     def get_upload_url(self, key, content_type):
         """
         Return the URL pointing to the ORA2 django storage upload endpoint.
         """
-        allowed_file_types = get_allowed_file_types()
+        file_extension = get_file_extension(content_type)
         parameters = {
             'key': key,
-            'file_ext': allowed_file_types[content_type.lower()],
+            'file_ext': file_extension,
         }
 
         return reverse("openassessment-django-storage", kwargs=parameters)
@@ -36,24 +39,34 @@ class Backend(BaseBackend):
         Returns None if no file exists at that location.
         """
         path = self._get_file_path(key)
+        metadata_path = '{path}{ext}'.format(path=path, ext=self.METADATA_FILE_EXTENSION)
 
-        # Loops over EDX_ORA_ALLOWED_FILE_TYPES values to find the correct extension type.
-        for ext in get_allowed_file_types().values():
-            path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
-            if default_storage.exists(path_with_ext):
-                return default_storage.url(path_with_ext)
+        if default_storage.exists(metadata_path):
+            metadata_file = default_storage.open(metadata_path).read()
+            metadata_dict = json.loads(metadata_file)
+            path_file_ext = '{path}{ext}'.format(path=path, ext=metadata_dict['ext'])
 
-        # If not extension match, returns the key without extension.
+            if default_storage.exists(path_file_ext):
+                return default_storage.url(path_file_ext)
+
         if default_storage.exists(path):
             return default_storage.url(path)
         return None
 
-    def upload_file(self, key, content):
+    def upload_file(self, key, content, file_ext):
         """
         Upload the given file content to the keyed location.
         """
         path = self._get_file_path(key)
-        saved_path = default_storage.save(path, ContentFile(content))
+        path_file_ext = '{path}{ext}'.format(path=path, ext=file_ext)
+        metadata_dict = {
+            "ext": file_ext
+        }
+        metadata_file = ContentFile(json.dumps(metadata_dict))
+        metadata_path = '{path}{ext}'.format(path=path, ext=self.METADATA_FILE_EXTENSION)
+
+        saved_path = default_storage.save(path_file_ext, ContentFile(content))
+        default_storage.save(metadata_path, metadata_file)
         return saved_path
 
     def remove_file(self, key):
@@ -64,15 +77,18 @@ class Backend(BaseBackend):
         Returns False if the file does not exist, and so was not removed.
         """
         path = self._get_file_path(key)
+        metadata_path = '{path}{ext}'.format(path=path, ext=self.METADATA_FILE_EXTENSION)
 
-        # Loops over EDX_ORA_ALLOWED_FILE_TYPES values to find and delete the correct file.
-        for ext in get_allowed_file_types().values():
-            path_with_ext = '{path}{ext}'.format(path=path, ext=ext)
-            if default_storage.exists(path_with_ext):
-                default_storage.delete(path_with_ext)
+        if default_storage.exists(metadata_path):
+            metadata_file = default_storage.open(metadata_path).read()
+            metadata_dict = json.loads(metadata_file)
+            path_file_ext = '{path}{ext}'.format(path=path, ext=metadata_dict['ext'])
+            default_storage.delete(metadata_path)
+
+            if default_storage.exists(path_file_ext):
+                default_storage.delete(path_file_ext)
                 return True
 
-        # If not extension match, find and delete the key value without extension.
         if default_storage.exists(path):
             default_storage.delete(path)
             return True
@@ -97,10 +113,11 @@ class Backend(BaseBackend):
         return path
 
 
-def get_allowed_file_types():
+def get_file_extension(content_type):
     """
-    Return the allowed file types from edx-ora2 base settings.
+    Return the file extension depending on content_type.
     """
-
-    file_types = getattr(settings, 'EDX_ORA_ALLOWED_FILE_TYPES', None)
-    return file_types
+    extension = mimetypes.guess_all_extensions(content_type)
+    if extension:
+        return extension[0]
+    raise ValueError('Unkwon content type file.')
