@@ -80,6 +80,7 @@ class Backend(BaseBackend):
         metadata_path = '{path}{ext}'.format(path=path, ext=self.METADATA_FILE_EXTENSION)
 
         if default_storage.exists(metadata_path):
+            import ipdb; ipdb.set_trace()
             metadata_file = default_storage.open(metadata_path).read()
             metadata_dict = json.loads(metadata_file)
             path_file_ext = '{path}{ext}'.format(path=path, ext=metadata_dict['ext'])
