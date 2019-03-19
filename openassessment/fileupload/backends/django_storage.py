@@ -45,7 +45,7 @@ class Backend(BaseBackend):
         # Checks that .meta file exists for this key.
         if default_storage.exists(metadata_path):
             metadata_file = default_storage.open(metadata_path).read()
-            metadata_dict = json.loads(metadata_file)
+            metadata_dict = get_metadata_dict(metadata_file)
             path_file_ext = '{path}{ext}'.format(path=path, ext=metadata_dict['ext'])
 
             if default_storage.exists(path_file_ext):
@@ -85,7 +85,7 @@ class Backend(BaseBackend):
         # Checks that .meta file exists for this key.
         if default_storage.exists(metadata_path):
             metadata_file = default_storage.open(metadata_path).read()
-            metadata_dict = json.loads(metadata_file)
+            metadata_dict = get_metadata_dict(metadata_file)
             path_file_ext = '{path}{ext}'.format(path=path, ext=metadata_dict['ext'])
             # Removes the .meta file too.
             default_storage.delete(metadata_path)
@@ -127,3 +127,14 @@ def get_file_extension(content_type):
         return extension[0]
 
     raise ValueError('Unknown content type file.')
+
+
+def get_metadata_dict(metadata_file):
+    """
+    Return a python dict object from metadata_file.
+    """
+    try:
+        metadata_dict = json.loads(metadata_file)
+        return metadata_dict
+    except ValueError:
+        raise ValueError('Metadata contents could not be loaded correctly.')
