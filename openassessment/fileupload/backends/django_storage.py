@@ -130,7 +130,9 @@ def get_file_extension(content_type):
         import ipdb; ipdb.set_trace()
         if len(extension) > 1:
             for ext in extension:
-                if ext in str(content_type):
+                # ext has a '.ext' format, so the '.' it is removed.
+                no_dot_ext = ext.replace('.', '')
+                if no_dot_ext in str(content_type):
                     return ext
         return extension[0]
     raise ValueError('Unknown content type file.')
