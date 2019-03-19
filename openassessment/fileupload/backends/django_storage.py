@@ -127,6 +127,7 @@ def get_file_extension(content_type):
     if extension:
         # Catching the correct extension type for image/jpeg mimetype, since this mimetype
         # it is the same for '.jpe', '.jpg', '.jpeg'.
+        import ipdb; ipdb.set_trace()
         if len(extension) > 1:
             for ext in extension:
                 if ext in content_type:
