@@ -1,5 +1,7 @@
 """
 Django-storage backend module.
+
+Creates the file alongs with a .meta file that contains info about the file saved.
 """
 
 import json
@@ -41,6 +43,7 @@ class Backend(BaseBackend):
         path = self._get_file_path(key)
         metadata_path = '{path}{ext}'.format(path=path, ext=self.METADATA_FILE_EXTENSION)
 
+        # Checks that .meta file exists for this key.
         if default_storage.exists(metadata_path):
             metadata_file = default_storage.open(metadata_path).read()
             metadata_dict = json.loads(metadata_file)
@@ -66,6 +69,7 @@ class Backend(BaseBackend):
         metadata_path = '{path}{ext}'.format(path=path, ext=self.METADATA_FILE_EXTENSION)
 
         saved_path = default_storage.save(path_file_ext, ContentFile(content))
+        # Saves the .meta file with the same file key.
         default_storage.save(metadata_path, metadata_file)
         return saved_path
 
@@ -79,11 +83,12 @@ class Backend(BaseBackend):
         path = self._get_file_path(key)
         metadata_path = '{path}{ext}'.format(path=path, ext=self.METADATA_FILE_EXTENSION)
 
+        # Checks that .meta file exists for this key.
         if default_storage.exists(metadata_path):
-            import ipdb; ipdb.set_trace()
             metadata_file = default_storage.open(metadata_path).read()
             metadata_dict = json.loads(metadata_file)
             path_file_ext = '{path}{ext}'.format(path=path, ext=metadata_dict['ext'])
+            # Removes the .meta file too.
             default_storage.delete(metadata_path)
 
             if default_storage.exists(path_file_ext):
@@ -116,9 +121,15 @@ class Backend(BaseBackend):
 
 def get_file_extension(content_type):
     """
-    Return the file extension depending on content_type.
+    Return the correct file extension depending on content_type.
     """
     extension = mimetypes.guess_all_extensions(content_type)
     if extension:
+        # Catching the correct extension type for image/jpeg mimetype, since this mimetype
+        # it is the same for '.jpe', '.jpg', '.jpeg'.
+        if len(extension) > 1:
+            for ext in extension:
+                if ext in content_type:
+                    return ext
         return extension[0]
-    raise ValueError('Unkwon content type file.')
+    raise ValueError('Unknown content type file.')
