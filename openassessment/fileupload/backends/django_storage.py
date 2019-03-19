@@ -125,14 +125,6 @@ def get_file_extension(content_type):
     """
     extension = mimetypes.guess_all_extensions(content_type)
     if extension:
-        # Catching the correct extension type for image/jpeg mimetype, since this mimetype
-        # it is the same for '.jpe', '.jpg', '.jpeg'.
-        import ipdb; ipdb.set_trace()
-        if len(extension) > 1:
-            for ext in extension:
-                # ext has a '.ext' format, so the '.' it is removed.
-                no_dot_ext = ext.replace('.', '')
-                if no_dot_ext in str(content_type):
-                    return ext
         return extension[0]
+
     raise ValueError('Unknown content type file.')
