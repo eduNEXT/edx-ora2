@@ -86,6 +86,7 @@ class Backend(BaseBackend):
 
         # Checks that .meta file exists for this key.
         if default_storage.exists(metadata_path):
+            metadata_file = default_storage.open(metadata_path).read().decode("utf-8")
             metadata_file = default_storage.open(metadata_path).read()
             metadata_dict = get_metadata_dict(metadata_file)
             path_file_ext = '{path}{ext}'.format(path=path, ext=metadata_dict['ext'])
