@@ -1072,6 +1072,73 @@ class OpenAssessmentBlock(
         template = get_template('openassessmentblock/oa_error.html')
         return Response(template.render(context), content_type='application/html', charset='UTF-8')
 
+    def can_use_date_extensions(self):
+        """
+        Check if the due date extension feature is enabled.
+
+        The due date extension feature is enabled if the due date extension
+        feature flag is enabled and the student has received an date extension.
+        """
+        if not self.is_due_date_extension_enabled:
+            return False
+
+        if not self.due:
+            return False
+
+        if not self.submission_due:
+            return False
+
+        block_due = parse_date_value(self.due, self._)
+        submission_due = parse_date_value(self.submission_due, self._)
+
+        has_due_date_extension = block_due > submission_due
+
+        if not has_due_date_extension:
+            return False
+
+        return True
+
+    def date_ranges(self):
+        """
+        Generate a list of dates ranges for the submission and assessment steps.
+
+        Returns:
+            submission_range (tuple): A tuple of the form (start, end) where
+                start and end are datetime objects.
+            assesment_ranges (list): A list of tuples of the form (start, end)
+                where start and end are datetime objects.
+
+        """
+        if self.can_use_date_extensions():
+
+            block_due = parse_date_value(self.due, self._)
+
+            submission_range = (self.submission_start, self.due)
+            assessment_ranges = []
+
+            for assesment in self.valid_assessments:
+                assesment_due = assesment.get('due')
+
+                if assesment_due is None:
+                    assessment_ranges.append((assesment.get('start'), assesment_due))
+                    continue
+
+                parsed_assesment_due = parse_date_value(assesment_due, self._)
+
+                is_extended = block_due < parsed_assesment_due
+
+                if is_extended:
+                    assessment_ranges.append((assesment.get('start'), assesment_due))
+                else:
+                    assessment_ranges.append((assesment.get('start'), self.due))
+        else:
+            submission_range = (self.submission_start, self.submission_due)
+            assessment_ranges = [
+                (asmnt.get('start'), asmnt.get('due'))
+                for asmnt in self.valid_assessments
+            ]
+        return submission_range, assessment_ranges
+
     def is_closed(self, step=None, course_staff=None):
         """
         Checks if the question is closed.
@@ -1112,11 +1179,7 @@ class OpenAssessmentBlock(
             datetime.datetime(2015, 3, 27, 22, 7, 38, 788861)
 
         """
-        submission_range = (self.submission_start, self.submission_due)
-        assessment_ranges = [
-            (asmnt.get('start'), asmnt.get('due'))
-            for asmnt in self.valid_assessments
-        ]
+        submission_range, assessment_ranges = self.date_ranges()
 
         # Resolve unspecified dates and date strings to datetimes
         start, due, date_ranges = resolve_dates(
