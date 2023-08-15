@@ -8,6 +8,7 @@ describe('OpenAssessment.WaitingStepList', () => {
   window.gettext = sinon.fake((text) => text);
 
   describe('With selectableLearnersEnabled as a prop', () => {
+    const WaitingStepListWrapper = ({ children }) => <div data-testid="learners-data-table">{children}</div>
 
     it('should allow row selection when is true', async () => {
       const studentList = [
@@ -23,12 +24,18 @@ describe('OpenAssessment.WaitingStepList', () => {
 
       render(
         <IntlProvider locale="en" messages={{}}>
-          <WaitingStepList selectableLearnersEnabled studentList={studentList} />
+          <WaitingStepListWrapper>
+            <WaitingStepList
+              selectableLearnersEnabled
+              studentList={studentList}
+            />
+          </WaitingStepListWrapper>
         </IntlProvider>
       );
 
-      await waitFor(() => screen.getByRole('table'));
-      const dataTable = screen.getByRole('table');
+
+      await waitFor(() =>  screen.getByTestId('learners-data-table'));
+      const dataTable = screen.getByTestId('learners-data-table');
 
       const headerCheckbox = dataTable.querySelector(
         'thead th input[type="checkbox"]'
@@ -40,7 +47,7 @@ describe('OpenAssessment.WaitingStepList', () => {
       expect(headerCheckbox).not.toBeNull();
       expect(firstRowCheckbox).not.toBeNull();
     });
-    
+
     it('should call findLearner function when has 1 row selected', async () => {
       // Create a jest spy for the findUsername function
       const findLearnerSpy = sinon.spy();
@@ -58,16 +65,18 @@ describe('OpenAssessment.WaitingStepList', () => {
 
       render(
         <IntlProvider locale="en" messages={{}}>
-          <WaitingStepList
-            selectableLearnersEnabled
-            studentList={studentList}
-            findLearner={findLearnerSpy}
-          />
+          <WaitingStepListWrapper>
+            <WaitingStepList
+              selectableLearnersEnabled
+              studentList={studentList}
+              findLearner={findLearnerSpy}
+            />
+          </WaitingStepListWrapper>
         </IntlProvider>
       );
 
-      await waitFor(() => screen.getByRole('table'));
-      const dataTable = screen.getByRole('table');
+      await waitFor(() =>  screen.getByTestId('learners-data-table'));
+      const dataTable = screen.getByTestId('learners-data-table');
      
       const firstRowCheckbox = dataTable.querySelector(
         'tbody tr:first-child td:first-child input[type="checkbox"]'
@@ -86,7 +95,7 @@ describe('OpenAssessment.WaitingStepList', () => {
 
     it('should show two checkboxes but not call findStudent function when has 2 rows selected', async () => {
       
-      const findStudentSpy = sinon.spy();
+      const findLearnerSpy = sinon.spy();
 
       const studentList = [
         {
@@ -109,16 +118,18 @@ describe('OpenAssessment.WaitingStepList', () => {
 
       render(
         <IntlProvider locale="en" messages={{}}>
-          <WaitingStepList
-            selectableLearnersEnabled
-            studentList={studentList}
-            findStudent={findStudentSpy} 
-          />
+          <WaitingStepListWrapper>
+            <WaitingStepList
+              selectableLearnersEnabled
+              studentList={studentList}
+              findLearner={findLearnerSpy}
+            />
+          </WaitingStepListWrapper>
         </IntlProvider>
       );
 
-      await waitFor(() => screen.getByRole('table'));
-      const dataTable = screen.getByRole('table');
+      await waitFor(() =>  screen.getByTestId('learners-data-table'));
+      const dataTable = screen.getByTestId('learners-data-table');
 
       const firstRowCheckbox = dataTable.querySelector(
         'tbody tr:first-child td:first-child input[type="checkbox"]'
@@ -138,11 +149,12 @@ describe('OpenAssessment.WaitingStepList', () => {
 
       fireEvent.click(findLearnerButton);
       
-      sinon.assert.notCalled(findStudentSpy);
+      sinon.assert.notCalled(findLearnerSpy);
     });
+    
 
     it('should not show  find-learner-button when has 0 row selected', async () => {
-      const findUsernameSpy = sinon.spy();
+      const findLearnerSpy = sinon.spy();
 
       const studentList = [
         {
@@ -157,16 +169,18 @@ describe('OpenAssessment.WaitingStepList', () => {
 
       render(
         <IntlProvider locale="en" messages={{}}>
-          <WaitingStepList
-            selectableLearnersEnabled
-            studentList={studentList}
-            findStudent={findUsernameSpy} 
-          />
+          <WaitingStepListWrapper>
+            <WaitingStepList
+              selectableLearnersEnabled
+              studentList={studentList}
+              findLearner={findLearnerSpy}
+            />
+          </WaitingStepListWrapper>
         </IntlProvider>
       );
 
-      await waitFor(() => screen.getByRole('table'));
-      const dataTable = screen.getByRole('table');
+      await waitFor(() =>  screen.getByTestId('learners-data-table'));
+      const dataTable = screen.getByTestId('learners-data-table');
 
       const firstRowCheckbox = dataTable.querySelector(
         'tbody tr:first-child td:first-child input[type="checkbox"]'
