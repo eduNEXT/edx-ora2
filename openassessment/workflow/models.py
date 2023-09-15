@@ -261,7 +261,12 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
         Returns:
              score dict.
         """
+        #import pudb; pu.db
         score = None
+        accumulated_score = {
+            'points_earned': 0,
+            'points_possible': 0
+        }
         for assessment_step_name in self.ASSESSMENT_SCORE_PRIORITY:
 
             # Check if the problem contains this assessment type
@@ -279,12 +284,17 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
                     else:
                         step_requirements = assessment_requirements.get(assessment_step_name, {})
                     score = get_score_func(self.identifying_uuid, step_requirements, course_settings)
+                    if score:
+                        accumulated_score.update(score)
+                        accumulated_score["points_earned"] += score['points_earned']
+                        accumulated_score["points_possible"] += score['points_possible']
                     if not score and assessment_step.is_staff_step():
                         if step_requirements and step_requirements.get('required', False):
                             break  # A staff score was not found, and one is required. Return None
                         continue  # A staff score was not found, but it is not required, so try the next type of score
-                    break
-
+                    # break
+        if accumulated_score["points_earned"]  and accumulated_score["points_possible"]:
+            score = accumulated_score
         return score
 
     def update_from_assessments(
