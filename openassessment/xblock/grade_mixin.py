@@ -2,7 +2,7 @@
 Grade step in the OpenAssessment XBlock.
 """
 
-
+from django.conf import settings
 import copy
 
 from lazy import lazy
@@ -156,7 +156,8 @@ class GradeMixin:
             'allow_latex': self.allow_latex,
             'prompts_type': self.prompts_type,
             'file_urls': self.get_download_urls_from_submission(student_submission),
-            'xblock_id': self.get_xblock_id()
+            'xblock_id': self.get_xblock_id(),
+            'is_accumulative_grading_enabled': self.is_accumulative_grading_enabled,
         }
 
         return ('openassessmentblock/grade/oa_grade_complete.html', context)
@@ -296,14 +297,17 @@ class GradeMixin:
             )
 
         max_scores = peer_api.get_rubric_max_scores(submission_uuid)
-        median_scores = None
+        median_scores = {}
         assessment_steps = self.assessment_steps
+
         if staff_assessment:
-            median_scores = staff_api.get_assessment_scores_by_criteria(submission_uuid)
-        elif "peer-assessment" in assessment_steps:
-            median_scores = peer_api.get_assessment_median_scores(submission_uuid)
-        elif "self-assessment" in assessment_steps:
-            median_scores = self_api.get_assessment_scores_by_criteria(submission_uuid)
+            median_scores["staff"] = staff_api.get_assessment_scores_by_criteria(submission_uuid)
+        if "peer-assessment" in assessment_steps:
+            median_scores["peer"] = peer_api.get_assessment_median_scores(submission_uuid)
+        if "self-assessment" in assessment_steps:
+            median_scores["self"] = self_api.get_assessment_scores_by_criteria(submission_uuid)
+
+        accumulated_criteria_scores = {}
 
         for criterion in criteria:
             criterion_name = criterion['name']
@@ -328,9 +332,13 @@ class GradeMixin:
             # if course authors directly import a course into Studio.
             # If this happens, we simply leave the score blank so that the grade
             # section can render without error.
-            criterion['median_score'] = median_scores.get(criterion_name, '')
+            criterion['median_score'] = sum(
+                median_scores.get(criterion_name, 0) for median_scores in median_scores.values()
+            )
             criterion['total_value'] = max_scores.get(criterion_name, '')
 
+            criterion['accumulated_total_value'] = max_scores.get(criterion_name, 1) * len(assessment_steps)
+            criterion['accumulated_score'] = criterion['median_score']
         return {
             'criteria': criteria,
             'additional_feedback': self._additional_feedback(
@@ -401,11 +409,15 @@ class GradeMixin:
             assessments.append(self_assessment_part)
 
         # Include points only for the first assessment
-        if assessments:
-            first_assessment = assessments[0]
-            option = first_assessment['option']
-            if option and option.get('points', None) is not None:
-                first_assessment['points'] = option['points']
+        # if assessments:
+        #     first_assessment = assessments[0]
+        #     option = first_assessment['option']
+        #     if option and option.get('points', None) is not None:
+        #         first_assessment['points'] = option['points']
+
+        for assessment in assessments:
+            if assessment.get('option') and assessment['option'].get('points', None) is not None:
+                assessment['points'] = assessment['option']['points']
 
         return assessments
 
@@ -610,6 +622,9 @@ class GradeMixin:
         score = workflow['score']
         complete = score is not None
 
+        if self.is_accumulative_grading_enabled:
+            return "accumulative"
+
         if "staff-assessment" in self.assessment_steps:
             return "staff"
 
@@ -657,7 +672,8 @@ class GradeMixin:
                 "The grade for this problem is determined by the median score of "
                 "your Peer Assessments."
             ),
-            "self": _("The grade for this problem is determined by your Self Assessment.")
+            "self": _("The grade for this problem is determined by your Self Assessment."),
+            "accumulative": _("The grade for this problem is determined by the sum of all your assessments steps."),
         }
         second_sentence = sentences.get(assessment_type, "")
 

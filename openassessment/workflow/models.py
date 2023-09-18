@@ -261,7 +261,6 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
         Returns:
              score dict.
         """
-        #import pudb; pu.db
         score = None
         accumulated_score = {
             'points_earned': 0,
@@ -285,7 +284,10 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
                         step_requirements = assessment_requirements.get(assessment_step_name, {})
                     score = get_score_func(self.identifying_uuid, step_requirements, course_settings)
                     if score:
-                        accumulated_score.update(score)
+                        score_copy = score.copy()
+                        score_copy.pop('points_earned', None)
+                        score_copy.pop('points_possible', None)
+                        accumulated_score.update(score_copy)
                         accumulated_score["points_earned"] += score['points_earned']
                         accumulated_score["points_possible"] += score['points_possible']
                     if not score and assessment_step.is_staff_step():
@@ -293,7 +295,7 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
                             break  # A staff score was not found, and one is required. Return None
                         continue  # A staff score was not found, but it is not required, so try the next type of score
                     # break
-        if accumulated_score["points_earned"]  and accumulated_score["points_possible"]:
+        if accumulated_score["points_earned"] and accumulated_score["points_possible"]:
             score = accumulated_score
         return score
 
@@ -355,37 +357,49 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
 
         step_for_name = {step.name: step for step in steps}
 
-        new_staff_score = self.get_score(
+        new_score = self.get_score(
             assessment_requirements,
             course_settings,
-            {self.STAFF_STEP_NAME: step_for_name.get(self.STAFF_STEP_NAME, None)}
+            step_for_name,
         )
-        if new_staff_score:
-            # new_staff_score is just the most recent staff score, it may already be recorded in sub_api
-            old_score = sub_api.get_latest_score_for_submission(self.submission_uuid)
-            if (
-                    # Does a prior score exist? Is it a staff score? Do the points earned match?
-                    not old_score or self.STAFF_ANNOTATION_TYPE not in [
-                        annotation['annotation_type'] for annotation in old_score['annotations']
-                    ] or old_score['points_earned'] != new_staff_score['points_earned']
-            ):
-                # Set the staff score using submissions api, and log that fact
-                self.set_staff_score(new_staff_score)
-                self.save()
-                logger.info(
-                    "Workflow for submission UUID %s has updated score using %s assessment.",
-                    self.submission_uuid,
-                    self.STAFF_STEP_NAME
-                )
+        if new_score:
+            self.set_score(new_score)
+            # Update the assessment_completed_at field for all steps
+            # All steps are considered "assessment complete", as the staff score will override all
+            self.save()
+            for step in steps:
+                common_now = now()
+                step.assessment_completed_at = common_now
+                if override_submitter_requirements:
+                    step.submitter_completed_at = common_now
+                step.save()
 
-                # Update the assessment_completed_at field for all steps
-                # All steps are considered "assessment complete", as the staff score will override all
-                for step in steps:
-                    common_now = now()
-                    step.assessment_completed_at = common_now
-                    if override_submitter_requirements:
-                        step.submitter_completed_at = common_now
-                    step.save()
+        # if new_staff_score:
+        #     # new_staff_score is just the most recent staff score, it may already be recorded in sub_api
+        #     old_score = sub_api.get_latest_score_for_submission(self.submission_uuid)
+        #     if (
+        #             # Does a prior score exist? Is it a staff score? Do the points earned match?
+        #             not old_score or self.STAFF_ANNOTATION_TYPE not in [
+        #                 annotation['annotation_type'] for annotation in old_score['annotations']
+        #             ] or old_score['points_earned'] != new_staff_score['points_earned']
+        #     ):
+        #         # Set the staff score using submissions api, and log that fact
+        #         self.set_staff_score(new_staff_score)
+        #         self.save()
+        #         logger.info(
+        #             "Workflow for submission UUID %s has updated score using %s assessment.",
+        #             self.submission_uuid,
+        #             self.STAFF_STEP_NAME
+        #         )
+
+        #         # Update the assessment_completed_at field for all steps
+        #         # All steps are considered "assessment complete", as the staff score will override all
+        #         for step in steps:
+        #             common_now = now()
+        #             step.assessment_completed_at = common_now
+        #             if override_submitter_requirements:
+        #                 step.submitter_completed_at = common_now
+        #             step.save()
 
         if self.status == self.STATUS.done:
             return
@@ -450,8 +464,8 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
             # If we found a score, then we're done
             if score is not None:
                 # Only set the score if it's not a staff score, in which case it will have already been set above
-                if score.get("staff_id") is None:
-                    self.set_score(score)
+                # if score.get("staff_id") is None:
+                self.set_score(score)
                 new_status = self.STATUS.done
 
         # Finally save our changes if the status has changed
@@ -543,12 +557,12 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
                 'points_possible'.
 
         """
-        if not self.staff_score_exists():
-            sub_api.set_score(
-                self.submission_uuid,
-                score["points_earned"],
-                score["points_possible"]
-            )
+        # if not self.staff_score_exists():
+        sub_api.set_score(
+            self.submission_uuid,
+            score["points_earned"],
+            score["points_possible"]
+        )
 
     def staff_score_exists(self):
         """

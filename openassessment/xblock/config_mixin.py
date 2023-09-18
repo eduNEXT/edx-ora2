@@ -153,3 +153,17 @@ class ConfigMixin:
         # .. toggle_creation_date: 2021-08-29
         # .. toggle_tickets: https://openedx.atlassian.net/browse/AU-50
         return self.is_feature_enabled(ENHANCED_STAFF_GRADER)
+
+    @property
+    def is_accumulative_grading_enabled(self):
+        """
+        Return a boolean indicating the accumulative grading feature is enabled or not.
+        """
+        # .. toggle_name: FEATURES['ENABLE_ACCUMULATIVE_GRADING']
+        # .. toggle_implementation: WaffleFlag
+        # .. toggle_default: False
+        # .. toggle_description: Set to True to enable the accumulative grading feature
+        # .. toggle_use_cases: circuit_breaker
+        # .. toggle_creation_date: 2021-08-29
+        # .. toggle_tickets: --
+        return settings.FEATURES.get('ENABLE_ACCUMULATIVE_GRADING', False)
