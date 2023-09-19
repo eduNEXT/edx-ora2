@@ -591,3 +591,13 @@ msgstr "Este ejercio de ORA ya ha sido liberado. Los cambios solo afectarán a l
 #: openassessment/xblock/static/js/src/studio/oa_edit.js:318
 msgid "error count: "
 msgstr "recuento de errores:"
+
+#: openassessment/xblock/static/dist/openassessment-studio.1ffb8619386559df14f9.js:32
+#: openassessment/xblock/static/js/src/lms/components/WaitingStepList.jsx:38
+msgid "Action"
+msgstr "Acción"
+
+#: openassessment/xblock/static/dist/openassessment-studio.1ffb8619386559df14f9.js:32
+#: openassessment/xblock/static/js/src/lms/components/WaitingStepList.jsx:47
+msgid "Review"
+msgstr "Revisar"
