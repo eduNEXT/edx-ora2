@@ -556,27 +556,8 @@ class OpenAssessmentBlock(
             "rubric_assessments": ui_models,
             "show_staff_area": self.is_course_staff and not self.in_studio_preview,
         }
-        template_name = "openassessmentblock/oa_base.html"
-        try:
-            # .. filter_implemented_name: ORAStudentViewRenderStarted
-            # .. filter_type: org.openedx.learning.ora.student_view.render.started.v1
-            context_dict, template_name = ORAStudentViewRenderStarted.run_filter(
-                context_dict,
-                template_name,
-            )
-        except ORAStudentViewRenderStarted.RenderInvalidTemplate as exc:
-            context_dict, template_name = (exc.template_context, exc.template)
-        except ORAStudentViewRenderStarted.RenderCustomFragment as exc:
-            fragment = exc.fragment
-        else:
-            template = get_template(template_name)
-            fragment = self._create_fragment(
-                template,
-                context_dict,
-                initialize_js_func='OpenAssessmentBlock',
-            )
-
-        return fragment
+        template = get_template("legacy/oa_base.html")
+        return self._create_fragment(template, context_dict, initialize_js_func='OpenAssessmentBlock')
 
     def ora_blocks_listing_view(self, context=None):
         """This view is used in the Open Response Assessment tab in the LMS Instructor Dashboard
@@ -606,7 +587,7 @@ class OpenAssessmentBlock(
             "ora_item_view_enabled": ora_item_view_enabled
         }
 
-        template = get_template('openassessmentblock/instructor_dashboard/oa_listing.html')
+        template = get_template('legacy/instructor_dashboard/oa_listing.html')
 
         min_postfix = '.min' if settings.DEBUG else ''
 
@@ -647,7 +628,7 @@ class OpenAssessmentBlock(
                 self.get_staff_assessment_statistics_context(student_item["course_id"], student_item["item_id"])
             )
 
-        template = get_template('openassessmentblock/instructor_dashboard/oa_grade_available_responses.html')
+        template = get_template('legacy/instructor_dashboard/oa_grade_available_responses.html')
 
         return self._create_fragment(template, context_dict, initialize_js_func='StaffAssessmentBlock')
 
@@ -677,7 +658,7 @@ class OpenAssessmentBlock(
                 self, "waiting_step_data",
             )
 
-        template = get_template('openassessmentblock/instructor_dashboard/oa_waiting_step_details.html')
+        template = get_template('legacy/instructor_dashboard/oa_waiting_step_details.html')
 
         return self._create_fragment(
             template,
@@ -999,7 +980,7 @@ class OpenAssessmentBlock(
             Response: A response object with an HTML body.
         """
         context = {'error_msg': error_msg}
-        template = get_template('openassessmentblock/oa_error.html')
+        template = get_template('legacy/oa_error.html')
         return Response(template.render(context), content_type='application/html', charset='UTF-8')
 
     def is_closed(self, step=None, course_staff=None):
