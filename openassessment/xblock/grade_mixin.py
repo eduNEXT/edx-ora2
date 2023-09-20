@@ -300,14 +300,20 @@ class GradeMixin:
         median_scores = {}
         assessment_steps = self.assessment_steps
 
-        if staff_assessment:
-            median_scores["staff"] = staff_api.get_assessment_scores_by_criteria(submission_uuid)
-        if "peer-assessment" in assessment_steps:
-            median_scores["peer"] = peer_api.get_assessment_median_scores(submission_uuid)
-        if "self-assessment" in assessment_steps:
-            median_scores["self"] = self_api.get_assessment_scores_by_criteria(submission_uuid)
-
-        accumulated_criteria_scores = {}
+        if self.is_accumulative_grading_enabled:
+            if staff_assessment:
+                median_scores["staff"] = staff_api.get_assessment_scores_by_criteria(submission_uuid)
+            if "peer-assessment" in assessment_steps:
+                median_scores["peer"] = peer_api.get_assessment_median_scores(submission_uuid)
+            if "self-assessment" in assessment_steps:
+                median_scores["self"] = self_api.get_assessment_scores_by_criteria(submission_uuid)
+        else:
+            if staff_assessment:
+                median_scores = staff_api.get_assessment_scores_by_criteria(submission_uuid)
+            elif "peer-assessment" in assessment_steps:
+                median_scores = peer_api.get_assessment_median_scores(submission_uuid)
+            elif "self-assessment" in assessment_steps:
+                median_scores = self_api.get_assessment_scores_by_criteria(submission_uuid)
 
         for criterion in criteria:
             criterion_name = criterion['name']
@@ -332,13 +338,20 @@ class GradeMixin:
             # if course authors directly import a course into Studio.
             # If this happens, we simply leave the score blank so that the grade
             # section can render without error.
-            criterion['median_score'] = sum(
-                median_scores.get(criterion_name, 0) for median_scores in median_scores.values()
-            )
-            criterion['total_value'] = max_scores.get(criterion_name, '')
+            if self.is_accumulative_grading_enabled:
+                # Explanation: the median_score for a criteria, is the sum of all gradable
+                # steps.
+                criterion['median_score'] = sum(
+                    median_scores.get(criterion_name, 0) for median_scores in median_scores.values()
+                )
+                criterion['total_value'] = max_scores.get(criterion_name, '')
 
-            criterion['accumulated_total_value'] = max_scores.get(criterion_name, 1) * len(assessment_steps)
-            criterion['accumulated_score'] = criterion['median_score']
+                criterion['accumulated_total_value'] = max_scores.get(criterion_name, 1) * len(assessment_steps)
+                criterion['accumulated_score'] = criterion['median_score']
+            else:
+                criterion['median_score'] = median_scores.get(criterion_name, '')
+                criterion['total_value'] = max_scores.get(criterion_name, '')
+
         return {
             'criteria': criteria,
             'additional_feedback': self._additional_feedback(
@@ -408,16 +421,17 @@ class GradeMixin:
         if self_assessment_part:
             assessments.append(self_assessment_part)
 
-        # Include points only for the first assessment
-        # if assessments:
-        #     first_assessment = assessments[0]
-        #     option = first_assessment['option']
-        #     if option and option.get('points', None) is not None:
-        #         first_assessment['points'] = option['points']
-
-        for assessment in assessments:
-            if assessment.get('option') and assessment['option'].get('points', None) is not None:
-                assessment['points'] = assessment['option']['points']
+        if self.is_accumulative_grading_enabled:
+            for assessment in assessments:
+                if assessment.get('option') and assessment['option'].get('points', None) is not None:
+                    assessment['points'] = assessment['option']['points']
+        else:
+            # Include points only for the first assessment
+            if assessments:
+                first_assessment = assessments[0]
+                option = first_assessment['option']
+                if option and option.get('points', None) is not None:
+                    first_assessment['points'] = option['points']
 
         return assessments
 

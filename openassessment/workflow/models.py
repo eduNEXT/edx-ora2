@@ -283,21 +283,84 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
                     else:
                         step_requirements = assessment_requirements.get(assessment_step_name, {})
                     score = get_score_func(self.identifying_uuid, step_requirements, course_settings)
-                    if score:
-                        score_copy = score.copy()
-                        score_copy.pop('points_earned', None)
-                        score_copy.pop('points_possible', None)
-                        accumulated_score.update(score_copy)
-                        accumulated_score["points_earned"] += score['points_earned']
-                        accumulated_score["points_possible"] += score['points_possible']
+                    self.update_accumulated_score(score, accumulated_score)
                     if not score and assessment_step.is_staff_step():
                         if step_requirements and step_requirements.get('required', False):
                             break  # A staff score was not found, and one is required. Return None
                         continue  # A staff score was not found, but it is not required, so try the next type of score
-                    # break
+                    if not self.is_accumulative_grading_enabled:
+                        break
         if accumulated_score["points_earned"] and accumulated_score["points_possible"]:
             score = accumulated_score
         return score
+
+    @property
+    def is_accumulative_grading_enabled(self):
+        """
+        Check if the accumulative grading is enabled for the system.
+
+        Returns:
+            bool: True if accumulative grading is enabled, False otherwise.
+        """
+        return settings.FEATURES.get("ENABLE_ACCUMULATIVE_GRADING", False)
+
+    def update_accumulated_score(self, score, accumulated_score):
+        """
+        Update the accumulated score with the given score.
+
+        Args:
+            score (dict): A dict containing 'points_earned' and
+                'points_possible'.
+            accumulated_score (dict): A dict containing 'points_earned' and
+                'points_possible'.
+
+        Returns:
+            dict: A dict containing 'points_earned' and 'points_possible'.
+        """
+        if not score or not self.is_accumulative_grading_enabled:
+            return
+        score_copy = score.copy()
+        score_copy.pop('points_earned', None)
+        score_copy.pop('points_possible', None)
+        accumulated_score.update(score_copy)
+        accumulated_score["points_earned"] += score['points_earned']
+        accumulated_score["points_possible"] += score['points_possible']
+
+    def set_new_staff_score(self, assessment_requirements, steps, step_for_name, course_settings, override_submitter_requirements):
+        """
+        Set a new staff score for the workflow.
+        """
+        new_staff_score = self.get_score(
+            assessment_requirements,
+            course_settings,
+            {self.STAFF_STEP_NAME: step_for_name.get(self.STAFF_STEP_NAME, None)}
+        )
+        if new_staff_score:
+            # new_staff_score is just the most recent staff score, it may already be recorded in sub_api
+            old_score = sub_api.get_latest_score_for_submission(self.submission_uuid)
+            if (
+                    # Does a prior score exist? Is it a staff score? Do the points earned match?
+                    not old_score or self.STAFF_ANNOTATION_TYPE not in [
+                        annotation['annotation_type'] for annotation in old_score['annotations']
+                    ] or old_score['points_earned'] != new_staff_score['points_earned']
+            ):
+                # Set the staff score using submissions api, and log that fact
+                self.set_staff_score(new_staff_score)
+                self.save()
+                logger.info(
+                    "Workflow for submission UUID %s has updated score using %s assessment.",
+                    self.submission_uuid,
+                    self.STAFF_STEP_NAME
+                )
+
+                # Update the assessment_completed_at field for all steps
+                # All steps are considered "assessment complete", as the staff score will override all
+                for step in steps:
+                    common_now = now()
+                    step.assessment_completed_at = common_now
+                    if override_submitter_requirements:
+                        step.submitter_completed_at = common_now
+                    step.save()
 
     def update_from_assessments(
         self,
@@ -357,49 +420,31 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
 
         step_for_name = {step.name: step for step in steps}
 
-        new_score = self.get_score(
-            assessment_requirements,
-            course_settings,
-            step_for_name,
-        )
-        if new_score:
-            self.set_score(new_score)
-            # Update the assessment_completed_at field for all steps
-            # All steps are considered "assessment complete", as the staff score will override all
-            self.save()
-            for step in steps:
-                common_now = now()
-                step.assessment_completed_at = common_now
-                if override_submitter_requirements:
-                    step.submitter_completed_at = common_now
-                step.save()
-
-        # if new_staff_score:
-        #     # new_staff_score is just the most recent staff score, it may already be recorded in sub_api
-        #     old_score = sub_api.get_latest_score_for_submission(self.submission_uuid)
-        #     if (
-        #             # Does a prior score exist? Is it a staff score? Do the points earned match?
-        #             not old_score or self.STAFF_ANNOTATION_TYPE not in [
-        #                 annotation['annotation_type'] for annotation in old_score['annotations']
-        #             ] or old_score['points_earned'] != new_staff_score['points_earned']
-        #     ):
-        #         # Set the staff score using submissions api, and log that fact
-        #         self.set_staff_score(new_staff_score)
-        #         self.save()
-        #         logger.info(
-        #             "Workflow for submission UUID %s has updated score using %s assessment.",
-        #             self.submission_uuid,
-        #             self.STAFF_STEP_NAME
-        #         )
-
-        #         # Update the assessment_completed_at field for all steps
-        #         # All steps are considered "assessment complete", as the staff score will override all
-        #         for step in steps:
-        #             common_now = now()
-        #             step.assessment_completed_at = common_now
-        #             if override_submitter_requirements:
-        #                 step.submitter_completed_at = common_now
-        #             step.save()
+        if self.is_accumulative_grading_enabled:
+            new_score = self.get_score(
+                assessment_requirements,
+                course_settings,
+                step_for_name,
+            )
+            if new_score:
+                self.set_score(new_score)
+                # Update the assessment_completed_at field for all steps
+                # All steps are considered "assessment complete", as the staff score will override all
+                self.save()
+                for step in steps:
+                    common_now = now()
+                    step.assessment_completed_at = common_now
+                    if override_submitter_requirements:
+                        step.submitter_completed_at = common_now
+                    step.save()
+        else:
+            self.set_new_staff_score(
+                assessment_requirements,
+                steps,
+                step_for_name,
+                course_settings,
+                override_submitter_requirements,
+            )
 
         if self.status == self.STATUS.done:
             return
@@ -464,8 +509,11 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
             # If we found a score, then we're done
             if score is not None:
                 # Only set the score if it's not a staff score, in which case it will have already been set above
-                # if score.get("staff_id") is None:
-                self.set_score(score)
+                if self.is_accumulative_grading_enabled:
+                    self.set_score(score)
+                else:
+                    if score.get("staff_id") is None:
+                        self.set_score(score)
                 new_status = self.STATUS.done
 
         # Finally save our changes if the status has changed
@@ -557,12 +605,19 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
                 'points_possible'.
 
         """
-        # if not self.staff_score_exists():
-        sub_api.set_score(
-            self.submission_uuid,
-            score["points_earned"],
-            score["points_possible"]
-        )
+        if self.is_accumulative_grading_enabled:
+            sub_api.set_score(
+                self.submission_uuid,
+                score["points_earned"],
+                score["points_possible"]
+            )
+        else:
+            if not self.staff_score_exists():
+                sub_api.set_score(
+                    self.submission_uuid,
+                    score["points_earned"],
+                    score["points_possible"]
+                )
 
     def staff_score_exists(self):
         """
