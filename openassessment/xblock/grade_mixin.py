@@ -339,15 +339,13 @@ class GradeMixin:
             # If this happens, we simply leave the score blank so that the grade
             # section can render without error.
             if self.is_accumulative_grading_enabled:
-                # Explanation: the median_score for a criteria, is the sum of all gradable
-                # steps.
-                criterion['median_score'] = sum(
-                    median_scores.get(criterion_name, 0) for median_scores in median_scores.values()
+                self.accumulative_grade_details(
+                    criterion=criterion,
+                    criterion_name=criterion_name,
+                    median_scores=median_scores,
+                    assessment_steps=assessment_steps,
+                    max_scores=max_scores,
                 )
-                criterion['total_value'] = max_scores.get(criterion_name, '')
-
-                criterion['accumulated_total_value'] = max_scores.get(criterion_name, 1) * len(assessment_steps)
-                criterion['accumulated_score'] = criterion['median_score']
             else:
                 criterion['median_score'] = median_scores.get(criterion_name, '')
                 criterion['total_value'] = max_scores.get(criterion_name, '')
@@ -360,6 +358,31 @@ class GradeMixin:
                 self_assessment=self_assessment,
             ),
         }
+
+    def accumulative_grade_details(self, criterion, criterion_name, median_scores, assessment_steps, max_scores):
+        """Return details according the grading strategy being used."""
+        if settings.FEATURES.get("ENABLE_ACCUMULATE_SCORE_GRADING", False):
+            # Explanation: the median_score for a criteria, is the sum of all gradable
+            # steps.
+            criterion['median_score'] = sum(
+                median_scores.get(criterion_name, 0) for median_scores in median_scores.values()
+            )
+            criterion['total_value'] = max_scores.get(criterion_name, '')
+
+            # The total value is the max_score for a criteria, times the number of steps
+            criterion['accumulated_total_value'] = max_scores.get(criterion_name, 1) * len(assessment_steps)
+            criterion['accumulated_score'] = criterion['median_score']
+            return
+
+        if settings.FEATURES.get("ENABLE_WEIGHTED_SCORE_GRADING", False):
+            criterion['median_score'] = sum(
+                median_scores.get(criterion_name, 0) for median_scores in median_scores.values()
+            )
+            criterion['total_value'] = max_scores.get(criterion_name, '')
+
+            criterion['accumulated_total_value'] = max_scores.get(criterion_name)
+            criterion['accumulated_score'] = criterion['median_score']
+            return
 
     def _graded_assessments(
             self, submission_uuid, criterion, assessment_steps, staff_assessment, peer_assessments,

@@ -283,7 +283,7 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
                     else:
                         step_requirements = assessment_requirements.get(assessment_step_name, {})
                     score = get_score_func(self.identifying_uuid, step_requirements, course_settings)
-                    self.update_accumulated_score(score, accumulated_score)
+                    self.update_score(score, accumulated_score=accumulated_score)
                     if not score and assessment_step.is_staff_step():
                         if step_requirements and step_requirements.get('required', False):
                             break  # A staff score was not found, and one is required. Return None
@@ -293,6 +293,34 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
         if accumulated_score["points_earned"] and accumulated_score["points_possible"]:
             score = accumulated_score
         return score
+
+    def update_score(self, current_score, **kwargs):
+        """Update score according the configured strategy."""
+        if self.is_accumulate_score_grading_enabled:
+            return self.update_accumulated_score(current_score, **kwargs)
+
+        if self.is_weighted_score_grading_enabled:
+            return self.update_weighted_score(current_score, **kwargs)
+
+    @property
+    def is_accumulate_score_grading_enabled(self):
+        """
+        Check if the accumulative grading is enabled for the system.
+
+        Returns:
+            bool: True if accumulative grading is enabled, False otherwise.
+        """
+        return settings.FEATURES.get("ENABLE_ACCUMULATE_SCORE_GRADING", False)
+
+    @property
+    def is_weighted_score_grading_enabled(self):
+        """
+        Check if the accumulative grading is enabled for the system.
+
+        Returns:
+            bool: True if accumulative grading is enabled, False otherwise.
+        """
+        return settings.FEATURES.get("ENABLE_WEIGHTED_SCORE_GRADING", False)
 
     @property
     def is_accumulative_grading_enabled(self):
@@ -304,7 +332,30 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
         """
         return settings.FEATURES.get("ENABLE_ACCUMULATIVE_GRADING", False)
 
-    def update_accumulated_score(self, score, accumulated_score):
+    def update_weighted_score(self, score, accumulated_score=0):
+        """
+        Update the accumulated score with the given score.
+
+        Args:
+            score (dict): A dict containing 'points_earned' and
+                'points_possible'.
+            accumulated_score (dict): A dict containing 'points_earned' and
+                'points_possible'.
+
+        Returns:
+            dict: A dict containing 'points_earned' and 'points_possible'.
+        """
+        if not score or not self.is_weighted_score_grading_enabled:
+            return
+        score_copy = score.copy()
+        score_copy.pop('points_earned', None)
+        score_copy.pop('points_possible', None)
+        accumulated_score.update(score_copy)
+        accumulated_score["points_earned"] += score['points_earned'] * 0.5
+        accumulated_score["points_possible"] = score['points_possible']
+        return accumulated_score
+
+    def update_accumulated_score(self, score, accumulated_score=0):
         """
         Update the accumulated score with the given score.
 
