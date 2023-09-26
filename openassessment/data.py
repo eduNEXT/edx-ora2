@@ -517,7 +517,7 @@ class OraAggregateData:
         Args:
             assessment - assessment containing the parts that we would like to report on.
             median_scores - dictionary with criterion name keys and median score values,
-               as returned by Assessment.get_median_score_dict()
+               as returned by Assessment.get_score_dict()
 
         Returns:
             OrderedDict that contains an entries for each criterion of the assessment(s).
@@ -888,7 +888,7 @@ class OraAggregateData:
         )
         if assessments:
             scores = Assessment.scores_by_criterion(assessments)
-            median_scores = Assessment.get_median_score_dict(scores)
+            median_scores = Assessment.get_score_dict(scores)
         else:
             # If no assessments, just report submission data.
             median_scores = []
