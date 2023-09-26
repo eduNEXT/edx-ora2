@@ -15,6 +15,7 @@ need to then generate a matching migration for it using:
 
 from collections import defaultdict
 from copy import deepcopy
+from django.conf import settings
 from hashlib import sha1
 import json
 import logging
@@ -489,6 +490,10 @@ class Assessment(models.Model):
         return cls.objects.create(**assessment_params)
 
     @classmethod
+    def get_score_dict(cls, scores_dict, score_type="median"):
+        return getattr(cls, f"get_{score_type}_score_dict")(scores_dict)
+
+    @classmethod
     def get_median_score_dict(cls, scores_dict):
         """Determine the median score in a dictionary of lists of scores
 
@@ -515,6 +520,36 @@ class Assessment(models.Model):
         median_scores = {}
         for criterion, criterion_scores in scores_dict.items():
             criterion_score = Assessment.get_median_score(criterion_scores)
+            median_scores[criterion] = criterion_score
+        return median_scores
+
+    @classmethod
+    def get_mean_score_dict(cls, scores_dict):
+        """Determine the mean score in a dictionary of lists of scores
+
+        For a dictionary of lists, where each list contains a set of scores,
+        determine the mean value in each list.
+
+        Args:
+            scores_dict (dict): A dictionary of lists of int values. These int
+                values are reduced to a single value that represents the median.
+
+        Returns:
+            (dict): A dictionary with criterion name keys and mean score
+                values.
+
+        Examples:
+            >>> scores = {
+            >>>     "foo": [1, 2, 3, 4, 5],
+            >>>     "bar": [6, 7, 8, 9, 10]
+            >>> }
+            >>> Assessment.get_mean_score_dict(scores)
+            {"foo": 3, "bar": 8}
+
+        """
+        median_scores = {}
+        for criterion, criterion_scores in scores_dict.items():
+            criterion_score = Assessment.get_mean_score(criterion_scores)
             median_scores[criterion] = criterion_score
         return median_scores
 
@@ -551,6 +586,28 @@ class Assessment(models.Model):
                 )
             )
         return median_score
+
+    @staticmethod
+    def get_mean_score(scores):
+        """Determine the median score in a list of scores
+
+        Determine the median value in the list.
+
+        Args:
+            scores (list): A list of int values. These int values
+                are reduced to a single value that represents the median.
+
+        Returns:
+            (int): The median score.
+
+        Examples:
+            >>> scores = 1, 2, 3, 4, 5]
+            >>> Assessment.get_median_score(scores)
+            3
+
+        """
+        total_criterion_scores = len(scores)
+        return int(math.ceil(sum(scores) / float(total_criterion_scores)))
 
     @classmethod
     def scores_by_criterion(cls, assessments):
