@@ -230,7 +230,7 @@ def get_assessment_scores_by_criteria(team_submission_uuid):
         scores = Assessment.scores_by_criterion(assessments)
         # Since this is only being sent one score, the median score will be the
         # same as the only score.
-        return Assessment.get_median_score_dict(scores)
+        return Assessment.get_score_dict(scores)
     except DatabaseError as ex:
         error_message = f"Error getting staff assessment scores for {team_submission_uuid}"
         logger.exception(error_message)
