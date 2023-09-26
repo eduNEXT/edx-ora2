@@ -133,6 +133,10 @@ class PeerSettingsSerializer(Serializer):
         source="enable_flexible_grading", required=False
     )
 
+    enableMeanGrading = BooleanField(
+        source="enable_mean_grading", required=False
+    )
+
 
 class AssessmentStepSettingsSerializer(Serializer):
     """
