@@ -351,7 +351,7 @@ class AssessmentWorkflow(TimeStampedModel, StatusModel):
         score_copy.pop('points_earned', None)
         score_copy.pop('points_possible', None)
         accumulated_score.update(score_copy)
-        accumulated_score["points_earned"] += score['points_earned'] * 0.5
+        accumulated_score["points_earned"] += int(score['points_earned'] * 0.5)
         accumulated_score["points_possible"] = score['points_possible']
         return accumulated_score
 
