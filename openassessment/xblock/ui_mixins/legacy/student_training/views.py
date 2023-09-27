@@ -4,6 +4,7 @@ Student training step in the OpenAssessment XBlock.
 import logging
 
 from webob import Response
+from openassessment.xblock.utils.retry_assessment import retry_assessment_enable
 
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -60,7 +61,8 @@ def training_context(api_data):
     # Retrieve the status of the workflow.
     # If no submissions have been created yet, the status will be None.
     user_preferences = api_data.config_data.user_preferences
-
+    retry_enable = retry_assessment_enable(api_data)
+    
     context = {
         "xblock_id": config_data.get_xblock_id(),
         "allow_multiple_files": config_data.allow_multiple_files,
@@ -68,6 +70,8 @@ def training_context(api_data):
         "prompts_type": config_data.prompts_type,
         "user_timezone": user_preferences["user_timezone"],
         "user_language": user_preferences["user_language"],
+        "retry_assessment_enable": retry_enable,
+        "user_id" : api_data._block.scope_ids.user_id,
     }
 
     if not step_data.has_workflow:

@@ -24,7 +24,6 @@
                 </span>
             </h4>
         </span>
-
        {% if self_start %}
        <span class="step__deadline">
            {# Translators: This string displays a date to the user, then tells them the time until that date.  Example: "available August 13th, 2014 (in 5 days and 45 minutes)" #}
@@ -77,6 +76,17 @@
                         <button type="submit" class="self-assessment--001__assessment__submit action action--submit" disabled>
                             {% trans "Submit your assessment" %}
                         </button>
+
+                        {% if retry_assessment_enable %}
+                            <button 
+                            class="self-assessment--001__assessment__retry_assessment_button" 
+                            style="background: rgb(0,117,180); color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; border: none;"
+                            data-userid="{{user_id}}">
+                                Reset your submission to be able to send it again
+                            </button>
+                        {% else %}
+
+                        {% endif %}
                     </li>
                 </ul>
             </div>

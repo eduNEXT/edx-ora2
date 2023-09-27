@@ -35,6 +35,16 @@
                 </div>
             </div>
         </div>
+        {% if retry_assessment_enable %}
+            <button 
+            class="staff-waiting--001__assessment__retry_assessment_button" 
+            style="background: rgb(0,117,180); color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; border: none;"
+            data-userid="{{user_id}}">
+                Reset your submission to be able to send it again
+            </button>
+        {% else %}
+
+        {% endif %}
     </div>
     {% endif %}
 
