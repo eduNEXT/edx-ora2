@@ -27,7 +27,34 @@ FLEXIBLE_PEER_GRADING_REQUIRED_SUBMISSION_AGE_IN_DAYS = 7
 FLEXIBLE_PEER_GRADING_GRADED_BY_PERCENTAGE = 30
 
 
-def required_peer_grades(submission_uuid, peer_requirements):
+def flexible_peer_grading_enabled(peer_requirements, course_settings):
+    """
+    Is flexible peer grading turned on? Either at the course override
+    level or the block level?
+    """
+    if course_settings.get('force_on_flexible_peer_openassessments'):
+        return True
+    return peer_requirements.get("enable_flexible_grading")
+
+
+def mean_peer_grading_enabled(peer_requirements):
+    """
+    Is mean peer grading turned on? Either at the course override
+    level or the block level?
+    """
+    return peer_requirements.get("enable_mean_grading")
+
+
+def get_peer_score_type(peer_requirements):
+    """
+    Get the peer grading type, either mean or median.
+    """
+    if mean_peer_grading_enabled(peer_requirements):
+        return "mean"
+    return "median"
+
+
+def required_peer_grades(submission_uuid, peer_requirements, course_settings):
     """
     Given a submission id, finds how many peer assessment required.
 
@@ -249,11 +276,10 @@ def get_score(submission_uuid, peer_requirements):
             scored_item.scored = True
             scored_item.save()
     assessments = [item.assessment for item in items]
-
+    score_type = get_peer_score_type(peer_requirements)
+    scores_dict = get_peer_assessment_scores(submission_uuid, score_type)
     return {
-        "points_earned": sum(
-            get_assessment_median_scores(submission_uuid).values()
-        ),
+        "points_earned": sum(scores_dict.values()),
         "points_possible": assessments[0].points_possible,
         "contributing_assessments": [assessment.id for assessment in assessments],
         "staff_id": None,
@@ -469,6 +495,44 @@ def get_rubric_max_scores(submission_uuid):
         logger.exception(error_message)
         raise PeerAssessmentInternalError(error_message) from ex
 
+def get_peer_assessment_scores(submission_uuid, score_type="median"):
+    """Get the median/mean score for each rubric criterion
+
+    For a given assessment, collect the median/mean score for each criterion on the
+    rubric. This set can be used to determine the overall score, as well as each
+    part of the individual rubric scores.
+
+    If there is a true median/mean score, it is returned. If there are two median/mean
+    values, the average of those two values is returned, rounded up to the
+    greatest integer value.
+
+    Args:
+        submission_uuid (str): The submission uuid is used to get the
+            assessments used to score this submission, and generate the
+            appropriate median/mean score.
+
+    Returns:
+        dict: A dictionary of rubric criterion names,
+        with a median/mean score of the peer assessments.
+
+    Raises:
+        PeerAssessmentInternalError: If any error occurs while retrieving
+            information to form the median/mean scores, an error is raised.
+    """
+    try:
+        workflow = PeerWorkflow.objects.get(submission_uuid=submission_uuid)
+        items = workflow.graded_by.filter(scored=True)
+        assessments = [item.assessment for item in items]
+        scores = Assessment.scores_by_criterion(assessments)
+        return Assessment.get_score_dict(scores, score_type=score_type)
+    except PeerWorkflow.DoesNotExist:
+        return {}
+    except DatabaseError as ex:
+        error_message = (
+            "Error getting assessment median scores for submission {uuid}"
+        ).format(uuid=submission_uuid)
+        logger.exception(error_message)
+        raise PeerAssessmentInternalError(error_message) from ex
 
 def get_assessment_median_scores(submission_uuid):
     """Get the median score for each rubric criterion

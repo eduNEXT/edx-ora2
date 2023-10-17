@@ -130,6 +130,7 @@ DEFAULT_PEER_ASSESSMENT = {
     "must_grade": 5,
     "must_be_graded_by": 3,
     "enable_flexible_grading": False,
+    "enable_mean_grading": False,
     "flexible_grading_days": 7,
     "flexible_grading_graded_by_percentage": 30
 }

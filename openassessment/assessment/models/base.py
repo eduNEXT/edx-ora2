@@ -490,10 +490,8 @@ class Assessment(models.Model):
         return cls.objects.create(**assessment_params)
 
     @classmethod
-    def get_score_dict(cls, scores_dict):
-        if settings.FEATURES.get("ORA_ENABLE_AVERAGE_PEER_SCORING", False):
-            return cls.get_mean_score_dict(scores_dict)
-        return cls.get_median_score_dict(scores_dict)
+    def get_score_dict(cls, scores_dict, score_type="median"):
+        return getattr(cls, f"get_{score_type}_score_dict")(scores_dict)
 
     @classmethod
     def get_median_score_dict(cls, scores_dict):

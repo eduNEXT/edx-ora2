@@ -48,6 +48,16 @@
                     </div>
                     <p class="setting-help">{% trans "When enabled, learners who have received at least 30% of the required \"Graded By\" peer reviews and who have waited longer than 7 days for a peer review will be assigned a peer review grade using available peer reviews." %}</p>
                 </li>
+                <li class="field comp-setting-entry">
+                    <div class="wrapper-comp-setting">
+                        <label for="peer_assessment_enable_mean_grading" class="setting-label">{% trans "Enable Peer Grade Mean Calculation" %}</label>
+                        <select id="peer_assessment_enable_mean_grading" class="input setting-input">
+                            <option value="0">{% trans "False" %}</option>
+                            <option value="1" {% if assessments.peer_assessment.enable_mean_grading %}selected="true"{% endif %}>{% trans "True" %}</option>
+                        </select>
+                    </div>
+                    <p class="setting-help">{% trans "When enabled, the mean is used instead of the median when calculating peer scores." %}</p>
+                </li>
             </ul>
         </div>
     </div>
