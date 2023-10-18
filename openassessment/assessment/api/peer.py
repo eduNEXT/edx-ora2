@@ -54,7 +54,7 @@ def get_peer_score_type(peer_requirements):
     return "median"
 
 
-def required_peer_grades(submission_uuid, peer_requirements, course_settings):
+def required_peer_grades(submission_uuid, peer_requirements):
     """
     Given a submission id, finds how many peer assessment required.
 
