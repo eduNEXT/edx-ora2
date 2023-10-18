@@ -60,16 +60,28 @@
                                                 <span class="icon fa fa-caret-right" aria-hidden="true"></span>
                                                 <span class="question__title__copy">{{ criterion.label }}</span>
                                             </button>
-                                            {% if criterion.total_value > 0 %}
+                                            {% if is_accumulative_grading_enabled %}
                                                 <span class="question__score">
                                                     <span class="label sr">{% trans "Overall Grade" %}</span>
-                                                    <span class="question__score__value">{{ criterion.median_score }}</span>
+                                                    <span class="question__score__value">{{ criterion.accumulated_score }}</span>
                                                     <span class="label label--divider sr">out of</span>
                                                     <span class="question__score__potential">
-                                                        {{ criterion.total_value }}
+                                                        {{ criterion.accumulated_total_value }}
                                                         <span class="unit">{% trans "Points" %}</span>
                                                     </span>
                                                 </span>
+                                            {% else %}
+                                                {% if criterion.total_value > 0 %}
+                                                    <span class="question__score">
+                                                        <span class="label sr">{% trans "Overall Grade" %}</span>
+                                                        <span class="question__score__value">{{ criterion.median_score }}</span>
+                                                        <span class="label label--divider sr">out of</span>
+                                                        <span class="question__score__potential">
+                                                            {{ criterion.total_value }}
+                                                            <span class="unit">{% trans "Points" %}</span>
+                                                        </span>
+                                                    </span>
+                                                {% endif %}
                                             {% endif %}
                                         </div>
 
