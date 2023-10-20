@@ -12,20 +12,21 @@ import os
 from urllib.parse import urljoin
 from zipfile import ZipFile
 
+import requests
+from submissions import api as sub_api
+from submissions.errors import SubmissionNotFoundError
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import CharField, F, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django.utils.translation import gettext as _
-import requests
 
-from submissions import api as sub_api
-from submissions.errors import SubmissionNotFoundError
-from openassessment.runtime_imports.classes import import_block_structure_transformers, import_external_id
-from openassessment.runtime_imports.functions import get_course_blocks, modulestore
 from openassessment.assessment.api import peer as peer_api
 from openassessment.assessment.models import Assessment, AssessmentFeedback, AssessmentPart
 from openassessment.fileupload.api import get_download_url
+from openassessment.runtime_imports.classes import import_block_structure_transformers, import_external_id
+from openassessment.runtime_imports.functions import get_course_blocks, modulestore
 from openassessment.workflow.models import AssessmentWorkflow, TeamAssessmentWorkflow
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ def _usernames_enabled():
     Checks if toggle for deanonymized usernames in report enabled.
     """
 
-    return settings.FEATURES.get('ENABLE_ORA_USERNAMES_ON_DATA_EXPORT', False)
+    return settings.FEATURES.get("ENABLE_ORA_USERNAMES_ON_DATA_EXPORT", False)
 
 
 def _use_read_replica(queryset):
@@ -96,43 +97,99 @@ def map_anonymized_ids_to_usernames(anonymized_ids):
     return anonymous_id_to_username_mapping
 
 
+def map_anonymized_ids_to_emails(anonymized_ids):
+    """
+    Args:
+        anonymized_ids - list of anonymized user ids.
+    Returns:
+        dictionary, that contains mapping between anonymized user ids and
+        actual user emails.
+    """
+    User = get_user_model()
+
+    users = _use_read_replica(
+        User.objects.filter(anonymoususerid__anonymous_user_id__in=anonymized_ids)
+        .annotate(anonymous_id=F("anonymoususerid__anonymous_user_id"))
+        .values("email", "anonymous_id")
+    )
+    anonymous_id_to_email_mapping = {
+        user["anonymous_id"]: user["email"] for user in users
+    }
+    return anonymous_id_to_email_mapping
+
+
+def map_anonymized_ids_to_fullname(anonymized_ids):
+    """
+    Args:
+        anonymized_ids - list of anonymized user ids.
+    Returns:
+        dictionary, that contains mapping between anonymized user ids and
+        actual user fullname.
+    """
+    User = get_user_model()
+
+    users = _use_read_replica(
+        User.objects.filter(anonymoususerid__anonymous_user_id__in=anonymized_ids)
+        .select_related("profile")
+        .annotate(anonymous_id=F("anonymoususerid__anonymous_user_id"))
+        .values("profile__name", "anonymous_id")
+    )
+
+    anonymous_id_to_fullname_mapping = {
+        user["anonymous_id"]: user["profile__name"] for user in users
+    }
+    return anonymous_id_to_fullname_mapping
+
+
 class CsvWriter:
     """
     Dump openassessment data to CSV files.
     """
 
     MODELS = [
-        'assessment', 'assessment_part',
-        'assessment_feedback', 'assessment_feedback_option',
-        'submission', 'score'
+        "assessment",
+        "assessment_part",
+        "assessment_feedback",
+        "assessment_feedback_option",
+        "submission",
+        "score",
     ]
 
     HEADERS = {
-        'assessment': [
-            'id', 'submission_uuid', 'scored_at',
-            'scorer_id', 'score_type',
-            'points_possible', 'feedback',
+        "assessment": [
+            "id",
+            "submission_uuid",
+            "scored_at",
+            "scorer_id",
+            "score_type",
+            "points_possible",
+            "feedback",
         ],
-        'assessment_part': [
-            'assessment_id', 'points_earned',
-            'criterion_name', 'criterion_label',
-            'option_name', 'option_label', 'feedback'
+        "assessment_part": [
+            "assessment_id",
+            "points_earned",
+            "criterion_name",
+            "criterion_label",
+            "option_name",
+            "option_label",
+            "feedback",
         ],
-        'assessment_feedback': [
-            'submission_uuid', 'feedback_text', 'options'
+        "assessment_feedback": ["submission_uuid", "feedback_text", "options"],
+        "assessment_feedback_option": ["id", "text"],
+        "submission": [
+            "uuid",
+            "student_id",
+            "item_id",
+            "submitted_at",
+            "created_at",
+            "raw_answer",
         ],
-        'assessment_feedback_option': [
-            'id', 'text'
+        "score": [
+            "submission_uuid",
+            "points_earned",
+            "points_possible",
+            "created_at",
         ],
-        'submission': [
-            'uuid', 'student_id', 'item_id',
-            'submitted_at', 'created_at', 'raw_answer'
-        ],
-        'score': [
-            'submission_uuid',
-            'points_earned', 'points_possible',
-            'created_at',
-        ]
     }
 
     # Number of submissions to retrieve at a time
@@ -200,23 +257,25 @@ class CsvWriter:
             # Django 1.4 doesn't follow reverse relations when using select_related,
             # so we select AssessmentPart and follow the foreign key to the Assessment.
             parts = _use_read_replica(
-                AssessmentPart.objects.select_related('assessment', 'option', 'option__criterion')
+                AssessmentPart.objects.select_related(
+                    "assessment", "option", "option__criterion"
+                )
                 .filter(assessment__submission_uuid=submission_uuid)
-                .order_by('assessment__pk')
+                .order_by("assessment__pk")
             )
             self._write_assessment_to_csv(parts, rubric_points_cache)
 
             feedback_query = _use_read_replica(
-                AssessmentFeedback.objects
-                .filter(submission_uuid=submission_uuid)
-                .prefetch_related('options')
+                AssessmentFeedback.objects.filter(
+                    submission_uuid=submission_uuid
+                ).prefetch_related("options")
             )
             for assessment_feedback in feedback_query:
                 self._write_assessment_feedback_to_csv(assessment_feedback)
                 # pylint: disable=unnecessary-comprehension
-                feedback_option_set.update({
-                    option for option in assessment_feedback.options.all()
-                })
+                feedback_option_set.update(
+                    {option for option in assessment_feedback.options.all()}
+                )
 
             if self._progress_callback is not None:
                 self._progress_callback()
@@ -251,14 +310,14 @@ class CsvWriter:
             # there should be >= N for us to process.
             end = start + self.QUERY_INTERVAL
             query = _use_read_replica(
-                AssessmentWorkflow.objects
-                .filter(course_id=course_id)
-                .order_by('created')
-            ).values('submission_uuid')[start:end]
+                AssessmentWorkflow.objects.filter(course_id=course_id).order_by(
+                    "created"
+                )
+            ).values("submission_uuid")[start:end]
 
             for workflow_dict in query:
                 num_results += 1
-                yield workflow_dict['submission_uuid']
+                yield workflow_dict["submission_uuid"]
 
             start += self.QUERY_INTERVAL
 
@@ -280,24 +339,34 @@ class CsvWriter:
             None
 
         """
-        submission = sub_api.get_submission_and_student(submission_uuid, read_replica=True)
-        self._write_unicode('submission', [
-            submission['uuid'],
-            submission['student_item']['student_id'],
-            submission['student_item']['item_id'],
-            submission['submitted_at'],
-            submission['created_at'],
-            json.dumps(submission['answer'])
-        ])
+        submission = sub_api.get_submission_and_student(
+            submission_uuid, read_replica=True
+        )
+        self._write_unicode(
+            "submission",
+            [
+                submission["uuid"],
+                submission["student_item"]["student_id"],
+                submission["student_item"]["item_id"],
+                submission["submitted_at"],
+                submission["created_at"],
+                json.dumps(submission["answer"]),
+            ],
+        )
 
-        score = sub_api.get_latest_score_for_submission(submission_uuid, read_replica=True)
+        score = sub_api.get_latest_score_for_submission(
+            submission_uuid, read_replica=True
+        )
         if score is not None:
-            self._write_unicode('score', [
-                score['submission_uuid'],
-                score['points_earned'],
-                score['points_possible'],
-                score['created_at']
-            ])
+            self._write_unicode(
+                "score",
+                [
+                    score["submission_uuid"],
+                    score["points_earned"],
+                    score["points_possible"],
+                    score["created_at"],
+                ],
+            )
 
     def _write_assessment_to_csv(self, assessment_parts, rubric_points_cache):
         """
@@ -315,15 +384,18 @@ class CsvWriter:
         assessment_id_set = set()
 
         for part in assessment_parts:
-            self._write_unicode('assessment_part', [
-                part.assessment.id,
-                part.points_earned,
-                part.criterion.name,
-                part.criterion.label,
-                part.option.name if part.option is not None else "",
-                part.option.label if part.option is not None else "",
-                part.feedback
-            ])
+            self._write_unicode(
+                "assessment_part",
+                [
+                    part.assessment.id,
+                    part.points_earned,
+                    part.criterion.name,
+                    part.criterion.label,
+                    part.option.name if part.option is not None else "",
+                    part.option.label if part.option is not None else "",
+                    part.feedback,
+                ],
+            )
 
             # If we haven't seen this assessment before, write it
             if part.assessment.id not in assessment_id_set:
@@ -339,15 +411,18 @@ class CsvWriter:
                     points_possible = assessment.points_possible
                     rubric_points_cache[assessment.rubric_id] = points_possible
 
-                self._write_unicode('assessment', [
-                    assessment.id,
-                    assessment.submission_uuid,
-                    assessment.scored_at,
-                    assessment.scorer_id,
-                    assessment.score_type,
-                    points_possible,
-                    assessment.feedback
-                ])
+                self._write_unicode(
+                    "assessment",
+                    [
+                        assessment.id,
+                        assessment.submission_uuid,
+                        assessment.scored_at,
+                        assessment.scorer_id,
+                        assessment.score_type,
+                        points_possible,
+                        assessment.feedback,
+                    ],
+                )
                 assessment_id_set.add(assessment.id)
 
     def _write_assessment_feedback_to_csv(self, assessment_feedback):
@@ -361,15 +436,18 @@ class CsvWriter:
             None
 
         """
-        options_string = ",".join([
-            str(option.id) for option in assessment_feedback.options.all()
-        ])
+        options_string = ",".join(
+            [str(option.id) for option in assessment_feedback.options.all()]
+        )
 
-        self._write_unicode('assessment_feedback', [
-            assessment_feedback.submission_uuid,
-            assessment_feedback.feedback_text,
-            options_string
-        ])
+        self._write_unicode(
+            "assessment_feedback",
+            [
+                assessment_feedback.submission_uuid,
+                assessment_feedback.feedback_text,
+                options_string,
+            ],
+        )
 
     def _write_feedback_options_to_csv(self, feedback_options):
         """
@@ -383,10 +461,7 @@ class CsvWriter:
 
         """
         for option in feedback_options:
-            self._write_unicode(
-                'assessment_feedback_option',
-                [option.id, option.text]
-            )
+            self._write_unicode("assessment_feedback_option", [option.id, option.text])
 
     def _write_unicode(self, output_name, row):
         """
@@ -458,14 +533,18 @@ class OraAggregateData:
         block_display_name_map = {}
 
         for block_key in blocks:
-            block_type = blocks.get_xblock_field(block_key, 'category')
-            if block_type == 'openassessment':
-                block_display_name_map[str(block_key)] = blocks.get_xblock_field(block_key, 'display_name')
+            block_type = blocks.get_xblock_field(block_key, "category")
+            if block_type == "openassessment":
+                block_display_name_map[str(block_key)] = blocks.get_xblock_field(
+                    block_key, "display_name"
+                )
 
         return block_display_name_map
 
     @classmethod
-    def _build_assessments_cell(cls, assessments, usernames_map, scored_peer_assessment_ids=None):
+    def _build_assessments_cell(
+        cls, assessments, usernames_map, scored_peer_assessment_ids=None
+    ):
         """
         Args:
             assessments (QuerySet) - assessments that we would like to collate into one column.
@@ -480,9 +559,11 @@ class OraAggregateData:
             returned_string += f"-- scored_at: {assessment.scored_at}\n"
             returned_string += f"-- type: {assessment.score_type}\n"
             if assessment.score_type == peer_api.PEER_TYPE:
-                returned_string += f'-- used to calculate peer grade: {assessment.id in scored_peer_assessment_ids}\n'
+                returned_string += f"-- used to calculate peer grade: {assessment.id in scored_peer_assessment_ids}\n"
             if _usernames_enabled():
-                returned_string += "-- scorer_username: {}\n".format(usernames_map.get(assessment.scorer_id, ''))
+                returned_string += "-- scorer_username: {}\n".format(
+                    usernames_map.get(assessment.scorer_id, "")
+                )
             returned_string += f"-- scorer_id: {assessment.scorer_id}\n"
             if assessment.feedback != "":
                 returned_string += f"-- overall_feedback: {assessment.feedback}\n"
@@ -499,7 +580,7 @@ class OraAggregateData:
         returned_string = ""
         for assessment in assessments:
             returned_string += f"Assessment #{assessment.id}\n"
-            for part in assessment.parts.order_by('criterion__order_num'):
+            for part in assessment.parts.order_by("criterion__order_num"):
                 returned_string += f"-- {part.criterion.label}"
                 if part.option is not None and part.option.label is not None:
                     option_label = part.option.label
@@ -523,18 +604,22 @@ class OraAggregateData:
         """
         parts = OrderedDict()
         number = 1
-        for part in assessment.parts.order_by('criterion__order_num'):
+        for part in assessment.parts.order_by("criterion__order_num"):
             option_label = None
             option_points = None
             if part.option:
                 option_label = part.option.label
                 option_points = part.option.points
 
-            criterion_col_label = _('Criterion {number}: {label}').format(number=number, label=part.criterion.label)
-            parts[criterion_col_label] = option_label or ''
-            parts[_('Points {number}').format(number=number)] = option_points or 0
-            parts[_('Median Score {number}').format(number=number)] = median_scores.get(part.criterion.name)
-            parts[_('Feedback {number}').format(number=number)] = part.feedback or ''
+            criterion_col_label = _("Criterion {number}: {label}").format(
+                number=number, label=part.criterion.label
+            )
+            parts[criterion_col_label] = option_label or ""
+            parts[_("Points {number}").format(number=number)] = option_points or 0
+            parts[_("Median Score {number}").format(number=number)] = median_scores.get(
+                part.criterion.name
+            )
+            parts[_("Feedback {number}").format(number=number)] = part.feedback or ""
             number += 1
         return parts
 
@@ -577,12 +662,18 @@ class OraAggregateData:
         Returns:
             string that contains newline-separated URLs to each of the files uploaded for this submission.
         """
-        file_links = ''
-        base_url = getattr(settings, 'LMS_ROOT_URL', '')
+        file_links = ""
+        base_url = getattr(settings, "LMS_ROOT_URL", "")
 
         from openassessment.xblock.openassessmentblock import OpenAssessmentBlock
-        file_downloads = OpenAssessmentBlock.get_download_urls_from_submission(submission)
-        file_links = [urljoin(base_url, file_download.get('download_url')) for file_download in file_downloads]
+
+        file_downloads = OpenAssessmentBlock.get_download_urls_from_submission(
+            submission
+        )
+        file_links = [
+            urljoin(base_url, file_download.get("download_url"))
+            for file_download in file_downloads
+        ]
         return "\n".join(file_links)
 
     @classmethod
@@ -601,7 +692,9 @@ class OraAggregateData:
                 for this course.
 
         """
-        all_submission_information = list(sub_api.get_all_course_submission_information(course_id, 'openassessment'))
+        all_submission_information = list(
+            sub_api.get_all_course_submission_information(course_id, "openassessment")
+        )
         usernames_enabled = _usernames_enabled()
 
         usernames_map = (
@@ -611,25 +704,28 @@ class OraAggregateData:
         )
         block_display_names_map = cls._map_block_usage_keys_to_display_names(course_id)
 
-        all_submission_uuids = [submission['uuid'] for _, submission, _ in all_submission_information]
+        all_submission_uuids = [
+            submission["uuid"] for _, submission, _ in all_submission_information
+        ]
         all_scored_peer_assessment_ids = {
-            assessment.id for assessment in peer_api.get_bulk_scored_assessments(all_submission_uuids)
+            assessment.id
+            for assessment in peer_api.get_bulk_scored_assessments(all_submission_uuids)
         }
 
         rows = []
         for student_item, submission, score in all_submission_information:
             assessments = _use_read_replica(
-                Assessment.objects.prefetch_related('parts').
-                prefetch_related('rubric').
-                filter(
-                    submission_uuid=submission['uuid']
-                )
+                Assessment.objects.prefetch_related("parts")
+                .prefetch_related("rubric")
+                .filter(submission_uuid=submission["uuid"])
             )
 
-            assessments_cell = cls._build_assessments_cell(assessments, usernames_map, all_scored_peer_assessment_ids)
+            assessments_cell = cls._build_assessments_cell(
+                assessments, usernames_map, all_scored_peer_assessment_ids
+            )
             assessments_parts_cell = cls._build_assessments_parts_cell(assessments)
             feedback_options_cell = cls._build_feedback_options_cell(assessments)
-            feedback_cell = cls._build_feedback_cell(submission['uuid'])
+            feedback_cell = cls._build_feedback_cell(submission["uuid"])
 
             row_username_cell = (
                 [usernames_map.get(student_item["student_id"], "")]
@@ -637,51 +733,50 @@ class OraAggregateData:
                 else []
             )
 
-            problem_name = block_display_names_map.get(student_item['item_id'])
+            problem_name = block_display_names_map.get(student_item["item_id"])
 
-            row = [
-                submission['uuid'],
-                student_item['item_id'],
-                problem_name,
-                submission['student_item'],
-            ] + row_username_cell + [
-                student_item['student_id'],
-                submission['submitted_at'],
-                #  Dumping required to render special characters in CSV
-                json.dumps(submission['answer'], ensure_ascii=False),
-                assessments_cell,
-                assessments_parts_cell,
-                score.get('created_at', ''),
-                score.get('points_earned', ''),
-                score.get('points_possible', ''),
-                feedback_options_cell,
-                feedback_cell
-            ]
+            row = (
+                [
+                    submission["uuid"],
+                    student_item["item_id"],
+                    problem_name,
+                    submission["student_item"],
+                ]
+                + row_username_cell
+                + [
+                    student_item["student_id"],
+                    submission["submitted_at"],
+                    #  Dumping required to render special characters in CSV
+                    json.dumps(submission["answer"], ensure_ascii=False),
+                    assessments_cell,
+                    assessments_parts_cell,
+                    score.get("created_at", ""),
+                    score.get("points_earned", ""),
+                    score.get("points_possible", ""),
+                    feedback_options_cell,
+                    feedback_cell,
+                ]
+            )
             rows.append(row)
 
-        header_username_cell = (
-            ['Username']
-            if usernames_enabled
-            else []
-        )
+        header_username_cell = ["Username"] if usernames_enabled else []
 
-        header = [
-            'Submission ID',
-            'Location',
-            'Problem Name',
-            'Item ID'
-        ] + header_username_cell + [
-            'Anonymized Student ID',
-            'Date/Time Response Submitted',
-            'Response',
-            'Assessment Details',
-            'Assessment Scores',
-            'Date/Time Final Score Given',
-            'Final Score Points Earned',
-            'Final Score Points Possible',
-            'Feedback Statements Selected',
-            'Feedback on Peer Assessments'
-        ]
+        header = (
+            ["Submission ID", "Location", "Problem Name", "Item ID"]
+            + header_username_cell
+            + [
+                "Anonymized Student ID",
+                "Date/Time Response Submitted",
+                "Response",
+                "Assessment Details",
+                "Assessment Scores",
+                "Date/Time Final Score Given",
+                "Final Score Points Earned",
+                "Final Score Points Possible",
+                "Feedback Statements Selected",
+                "Feedback on Peer Assessments",
+            ]
+        )
         return header, rows
 
     @classmethod
@@ -741,72 +836,84 @@ class OraAggregateData:
                 if not statuses.get(step):
                     # if no status for step, then the 'complete' and 'graded'
                     # statuses should be empty.
-                    steps_statuses.append('')
-                    steps_statuses.append('')
+                    steps_statuses.append("")
+                    steps_statuses.append("")
                     continue
 
                 # if we get to here, then a status exists for `step`
 
-                if statuses[step]['complete']:
+                if statuses[step]["complete"]:
                     steps_statuses.append(1)
                 else:
                     steps_statuses.append(0)
 
-                if statuses[step]['graded']:
+                if statuses[step]["graded"]:
                     steps_statuses.append(1)
                 else:
                     steps_statuses.append(0)
 
                 # the peer step is special and has extra metadata
-                if step == 'peer':
-                    peers_graded = statuses[step]['peers_graded_count'] or 0
-                    graded_by_count = statuses[step]['graded_by_count'] or 0
+                if step == "peer":
+                    peers_graded = statuses[step]["peers_graded_count"] or 0
+                    graded_by_count = statuses[step]["graded_by_count"] or 0
 
             is_staff_grade_received = 1 if aw.staff_score_exists() else 0
-            is_final_grade_received = 1 if aw.status == AssessmentWorkflow.STATUS.done else 0
+            is_final_grade_received = (
+                1 if aw.status == AssessmentWorkflow.STATUS.done else 0
+            )
 
             score = aw.score
             if score is not None:
-                final_grade_points_earned = score['points_earned']
-                final_grade_points_possible = score['points_possible']
+                final_grade_points_earned = score["points_earned"]
+                final_grade_points_possible = score["points_possible"]
             else:
-                final_grade_points_earned = ''
-                final_grade_points_possible = ''
+                final_grade_points_earned = ""
+                final_grade_points_possible = ""
 
-            row = [
-                aw.item_id,
-                submission_dict['student_item']['student_id'],
-                aw.status,
-            ] + steps_statuses + [
-                peers_graded,
-                graded_by_count,
-                is_staff_grade_received,
-                is_final_grade_received,
-                final_grade_points_earned,
-                final_grade_points_possible,
-            ]
+            row = (
+                [
+                    aw.item_id,
+                    submission_dict["student_item"]["student_id"],
+                    aw.status,
+                ]
+                + steps_statuses
+                + [
+                    peers_graded,
+                    graded_by_count,
+                    is_staff_grade_received,
+                    is_final_grade_received,
+                    final_grade_points_earned,
+                    final_grade_points_possible,
+                ]
+            )
             rows.append(row)
 
-        steps_headers = list(chain.from_iterable(
-            (
-                f"is_{step}_complete",
-                f"is_{step}_graded",
+        steps_headers = list(
+            chain.from_iterable(
+                (
+                    f"is_{step}_complete",
+                    f"is_{step}_graded",
+                )
+                for step in steps
             )
-            for step in steps
-        ))
+        )
 
-        header = [
-            'block_name',
-            'student_id',
-            'status',
-        ] + steps_headers + [
-            'num_peers_graded',
-            'num_graded_by_peers',
-            'is_staff_grade_received',
-            'is_final_grade_received',
-            'final_grade_points_earned',
-            'final_grade_points_possible',
-        ]
+        header = (
+            [
+                "block_name",
+                "student_id",
+                "status",
+            ]
+            + steps_headers
+            + [
+                "num_peers_graded",
+                "num_graded_by_peers",
+                "is_staff_grade_received",
+                "is_final_grade_received",
+                "final_grade_points_earned",
+                "final_grade_points_possible",
+            ]
+        )
 
         return header, rows
 
@@ -841,13 +948,15 @@ class OraAggregateData:
         else:
             statuses = all_valid_ora_statuses
 
-        items = AssessmentWorkflow.objects.filter(course_id=course_id, status__in=statuses).values('item_id', 'status')
+        items = AssessmentWorkflow.objects.filter(
+            course_id=course_id, status__in=statuses
+        ).values("item_id", "status")
 
         result = defaultdict(lambda: {status: 0 for status in statuses})
         for item in items:
-            item_id = item['item_id']
-            status = item['status']
-            result[item_id]['total'] = result[item_id].get('total', 0) + 1
+            item_id = item["item_id"]
+            status = item["status"]
+            result[item_id]["total"] = result[item_id].get("total", 0) + 1
             if status in statuses:
                 result[item_id][status] += 1
 
@@ -863,8 +972,8 @@ class OraAggregateData:
         * submission_uuid: unique identifier for the submission, or None
         """
         row = OrderedDict()
-        row[_('Item ID')] = xblock_id
-        row[_('Submission ID')] = submission_uuid or ''
+        row[_("Item ID")] = xblock_id
+        row[_("Submission ID")] = submission_uuid or ""
 
         submission = None
         if submission_uuid:
@@ -875,15 +984,13 @@ class OraAggregateData:
             yield row
             return
 
-        student_item = submission['student_item']
-        row[_('Anonymized Student ID')] = student_item['student_id']
+        student_item = submission["student_item"]
+        row[_("Anonymized Student ID")] = student_item["student_id"]
 
         assessments = _use_read_replica(
-            Assessment.objects.prefetch_related('parts').
-            prefetch_related('rubric').
-            filter(
-                submission_uuid=submission['uuid']
-            )
+            Assessment.objects.prefetch_related("parts")
+            .prefetch_related("rubric")
+            .filter(submission_uuid=submission["uuid"])
         )
         if assessments:
             scores = Assessment.scores_by_criterion(assessments)
@@ -900,29 +1007,41 @@ class OraAggregateData:
         for assessment in assessments:
             assessment_row = row.copy()
             if assessment:
-                assessment_cells = cls._build_assessment_parts_array(assessment, median_scores)
+                assessment_cells = cls._build_assessment_parts_array(
+                    assessment, median_scores
+                )
                 feedback_options_cell = cls._build_feedback_options_cell([assessment])
 
-                score_created_at = score.get('created_at', '')
+                score_created_at = score.get("created_at", "")
                 if score_created_at:
-                    score_created_at = score_created_at.strftime('%F %T %Z')
+                    score_created_at = score_created_at.strftime("%F %T %Z")
 
-                assessment_row[_('Assessment ID')] = assessment.id
-                assessment_row[_('Assessment Scored Date')] = assessment.scored_at.strftime('%F')
-                assessment_row[_('Assessment Scored Time')] = assessment.scored_at.strftime('%T %Z')
-                assessment_row[_('Assessment Type')] = assessment.score_type
-                assessment_row[_('Anonymous Scorer Id')] = assessment.scorer_id
+                assessment_row[_("Assessment ID")] = assessment.id
+                assessment_row[
+                    _("Assessment Scored Date")
+                ] = assessment.scored_at.strftime("%F")
+                assessment_row[
+                    _("Assessment Scored Time")
+                ] = assessment.scored_at.strftime("%T %Z")
+                assessment_row[_("Assessment Type")] = assessment.score_type
+                assessment_row[_("Anonymous Scorer Id")] = assessment.scorer_id
                 assessment_row.update(assessment_cells)
-                assessment_row[_('Overall Feedback')] = assessment.feedback or ''
-                assessment_row[_('Assessment Score Earned')] = assessment.points_earned
-                assessment_row[_('Assessment Scored At')] = assessment.scored_at.strftime('%F %T %Z')
-                assessment_row[_('Date/Time Final Score Given')] = score_created_at
-                assessment_row[_('Final Score Earned')] = score.get('points_earned', '')
-                assessment_row[_('Final Score Possible')] = score.get('points_possible', assessment.points_possible)
-                assessment_row[_('Feedback Statements Selected')] = feedback_options_cell
-                assessment_row[_('Feedback on Assessment')] = feedback_cell
+                assessment_row[_("Overall Feedback")] = assessment.feedback or ""
+                assessment_row[_("Assessment Score Earned")] = assessment.points_earned
+                assessment_row[
+                    _("Assessment Scored At")
+                ] = assessment.scored_at.strftime("%F %T %Z")
+                assessment_row[_("Date/Time Final Score Given")] = score_created_at
+                assessment_row[_("Final Score Earned")] = score.get("points_earned", "")
+                assessment_row[_("Final Score Possible")] = score.get(
+                    "points_possible", assessment.points_possible
+                )
+                assessment_row[
+                    _("Feedback Statements Selected")
+                ] = feedback_options_cell
+                assessment_row[_("Feedback on Assessment")] = feedback_cell
 
-            assessment_row[_('Response Files')] = response_files
+            assessment_row[_("Response Files")] = response_files
             yield assessment_row
 
 
@@ -932,19 +1051,19 @@ class OraDownloadData:
     to submissions (attachments, answer texts).
     """
 
-    ATTACHMENT = 'attachment'
-    TEXT = 'text'
+    ATTACHMENT = "attachment"
+    TEXT = "text"
     SUBMISSIONS_CSV_HEADER = (
-        'course_id',
-        'block_id',
-        'student_id',
-        'key',
-        'name',
-        'type',
-        'description',
-        'size',
-        'file_path',
-        'file_found',
+        "course_id",
+        "block_id",
+        "student_id",
+        "key",
+        "name",
+        "type",
+        "description",
+        "size",
+        "file_path",
+        "file_found",
     )
     MAX_FILE_NAME_LENGTH = 255
 
@@ -953,9 +1072,7 @@ class OraDownloadData:
         url = get_download_url(key)
         if not url:
             raise FileMissingException
-        download_url = urljoin(
-            settings.LMS_ROOT_URL, url
-        )
+        download_url = urljoin(settings.LMS_ROOT_URL, url)
 
         response = requests.get(download_url)
         response.raise_for_status()
@@ -969,7 +1086,9 @@ class OraDownloadData:
         all information needed to build the submission file path.
         """
         blocks = _get_course_blocks(course_id)
-        logger.info("[%s] _get_course_blocks returned %d blocks", course_id, len(blocks))
+        logger.info(
+            "[%s] _get_course_blocks returned %d blocks", course_id, len(blocks)
+        )
 
         path_info = {}
 
@@ -978,15 +1097,19 @@ class OraDownloadData:
             child_blocks = blocks.get_children(usage_key)
             filtered = filter(condition, child_blocks)
             for index, child in enumerate(filtered, 1):
-                yield index, blocks.get_xblock_field(child, 'display_name'), child
+                yield index, blocks.get_xblock_field(child, "display_name"), child
 
         def only_ora_blocks(block):
             return block.block_type == "openassessment"
 
-        for section_index, section_name, section in children(blocks.root_block_usage_key):
+        for section_index, section_name, section in children(
+            blocks.root_block_usage_key
+        ):
             for sub_section_index, sub_section_name, sub_section in children(section):
                 for unit_index, unit_name, unit in children(sub_section):
-                    for block_index, block_name, block in children(unit, only_ora_blocks):
+                    for block_index, block_name, block in children(
+                        unit, only_ora_blocks
+                    ):
                         ora_block_path_info = {
                             "section_index": section_index,
                             "section_name": section_name,
@@ -1136,7 +1259,7 @@ class OraDownloadData:
         submission_filename = cls._submission_filename(
             ora_path_info["ora_index"] if ora_path_info else "x",
             student_id,
-            original_filename
+            original_filename,
         )
 
         return os.path.join(directory_name, submission_filename)
@@ -1170,19 +1293,21 @@ class OraDownloadData:
         """
         csv_output_buffer = StringIO()
 
-        csvwriter = csv.DictWriter(csv_output_buffer, cls.SUBMISSIONS_CSV_HEADER, extrasaction='ignore')
+        csvwriter = csv.DictWriter(
+            csv_output_buffer, cls.SUBMISSIONS_CSV_HEADER, extrasaction="ignore"
+        )
         csvwriter.writeheader()
 
-        with ZipFile(file, 'w') as zip_file:
+        with ZipFile(file, "w") as zip_file:
             for file_data in submission_files_data:
-                key = file_data['key']
-                file_path = file_data['file_path']
+                key = file_data["key"]
+                file_path = file_data["file_path"]
                 file_found = False
                 try:
                     file_content = (
                         cls._download_file_by_key(key)
-                        if file_data['type'] == cls.ATTACHMENT
-                        else file_data['content']
+                        if file_data["type"] == cls.ATTACHMENT
+                        else file_data["content"]
                     )
                 except FileMissingException:
                     # added a header to csv file to indicate that the file was found or not.
@@ -1196,26 +1321,25 @@ class OraDownloadData:
                         "Name: {file_name} | "
                         "Type: {file_type}"
                     ).format(
-                        course_id=file_data['course_id'],
-                        block_id=file_data['block_id'],
-                        student_id=file_data['student_id'],
-                        file_key=file_data['key'],
-                        file_name=file_data['name'],
-                        file_type=file_data['type'],
+                        course_id=file_data["course_id"],
+                        block_id=file_data["block_id"],
+                        student_id=file_data["student_id"],
+                        file_key=file_data["key"],
+                        file_name=file_data["name"],
+                        file_type=file_data["type"],
                     )
                     logger.warning(
-                        'File for submission could not be downloaded for ORA submission archive. %s',
-                        file_info_string
+                        "File for submission could not be downloaded for ORA submission archive. %s",
+                        file_info_string,
                     )
                 else:
                     file_found = True
                     zip_file.writestr(file_path, file_content)
                 finally:
-                    csvwriter.writerow({**file_data, 'file_found': file_found})
+                    csvwriter.writerow({**file_data, "file_found": file_found})
 
             zip_file.writestr(
-                'submissions.csv',
-                csv_output_buffer.getvalue().encode('utf-8')
+                "submissions.csv", csv_output_buffer.getvalue().encode("utf-8")
             )
 
         file.seek(0)
@@ -1227,65 +1351,77 @@ class OraDownloadData:
         Generator, that yields dictionaries with information about submission
         attachment or answer text.
         """
-        all_submission_information = list(sub_api.get_all_course_submission_information(course_id, 'openassessment'))
+        all_submission_information = list(
+            sub_api.get_all_course_submission_information(course_id, "openassessment")
+        )
         logger.info(
             "[%s] Submission information loaded from submission API (len=%d)",
             course_id,
-            len(all_submission_information)
+            len(all_submission_information),
         )
         all_ora_path_information = cls._map_ora_usage_keys_to_path_info(course_id)
-        logger.info("[%s] Loaded ORA path info (len=%d)", course_id, len(all_ora_path_information))
-        student_identifiers_map = cls._map_student_ids_to_path_ids(all_submission_information)
-        logger.info("[%s] Loaded student identifiers (len=%d)", course_id, len(student_identifiers_map))
+        logger.info(
+            "[%s] Loaded ORA path info (len=%d)",
+            course_id,
+            len(all_ora_path_information),
+        )
+        student_identifiers_map = cls._map_student_ids_to_path_ids(
+            all_submission_information
+        )
+        logger.info(
+            "[%s] Loaded student identifiers (len=%d)",
+            course_id,
+            len(student_identifiers_map),
+        )
 
         for student, submission, _ in all_submission_information:
             # Submissions created from the studio authoring view will create a submission for
             # a student called `student` with no mapping to a real django User. Doing so should no longer be allowed,
             # but this remains for backwards compatibility.
-            if student['student_id'] not in student_identifiers_map:
+            if student["student_id"] not in student_identifiers_map:
                 logger.info(
                     "[%s] Student id %s has no mapping to a user and will be skipped",
                     course_id,
-                    student['student_id']
+                    student["student_id"],
                 )
                 continue
 
-            raw_answer = submission.get('answer', {})
+            raw_answer = submission.get("answer", {})
             answer = OraSubmissionAnswerFactory.parse_submission_raw_answer(raw_answer)
             for index, uploaded_file in enumerate(answer.get_file_uploads()):
                 yield {
-                    'type': cls.ATTACHMENT,
-                    'course_id': course_id,
-                    'block_id': student['item_id'],
-                    'student_id': student['student_id'],
-                    'key': uploaded_file.key,
-                    'name': uploaded_file.name,
-                    'description': uploaded_file.description,
-                    'size': uploaded_file.size,
-                    'file_path': cls._submission_filepath(
-                        all_ora_path_information.get(student['item_id']),
-                        student_identifiers_map[student['student_id']],
+                    "type": cls.ATTACHMENT,
+                    "course_id": course_id,
+                    "block_id": student["item_id"],
+                    "student_id": student["student_id"],
+                    "key": uploaded_file.key,
+                    "name": uploaded_file.name,
+                    "description": uploaded_file.description,
+                    "size": uploaded_file.size,
+                    "file_path": cls._submission_filepath(
+                        all_ora_path_information.get(student["item_id"]),
+                        student_identifiers_map[student["student_id"]],
                         uploaded_file.name,
                     ),
                 }
 
             # collecting submission answer texts
             for index, text_response in enumerate(answer.get_text_responses()):
-                file_name = f'prompt_{index}.txt'
+                file_name = f"prompt_{index}.txt"
 
                 yield {
-                    'type': cls.TEXT,
-                    'course_id': course_id,
-                    'block_id': student['item_id'],
-                    'student_id': student['student_id'],
-                    'key': '',
-                    'name': file_name,
-                    'description': 'Submission text.',
-                    'content': text_response,
-                    'size': len(text_response),
-                    'file_path': cls._submission_filepath(
-                        all_ora_path_information.get(student['item_id']),
-                        student_identifiers_map[student['student_id']],
+                    "type": cls.TEXT,
+                    "course_id": course_id,
+                    "block_id": student["item_id"],
+                    "student_id": student["student_id"],
+                    "key": "",
+                    "name": file_name,
+                    "description": "Submission text.",
+                    "content": text_response,
+                    "size": len(text_response),
+                    "file_path": cls._submission_filepath(
+                        all_ora_path_information.get(student["item_id"]),
+                        student_identifiers_map[student["student_id"]],
                         file_name,
                     ),
                 }
@@ -1317,8 +1453,16 @@ class SubmissionFileUpload:
 
     def __init__(self, key, name=None, description=None, size=0):
         self.key = key
-        self.name = name if name is not None else SubmissionFileUpload.generate_name_from_key(key)
-        self.description = description if description is not None else SubmissionFileUpload.DEFAULT_DESCRIPTION
+        self.name = (
+            name
+            if name is not None
+            else SubmissionFileUpload.generate_name_from_key(key)
+        )
+        self.description = (
+            description
+            if description is not None
+            else SubmissionFileUpload.DEFAULT_DESCRIPTION
+        )
         self.size = size
 
     @staticmethod
@@ -1327,11 +1471,11 @@ class SubmissionFileUpload:
         Return the hex representation of the absolute hash of a value.
         Used to generate arbitrary file names for files with no name.
         """
-        return format(abs(hash(key)), 'x')
+        return format(abs(hash(key)), "x")
 
 
 class OraSubmissionAnswerFactory:
-    """ A factory class that takes the parsed json raw_answer from a submission and returns an OraSubmissionAnswer """
+    """A factory class that takes the parsed json raw_answer from a submission and returns an OraSubmissionAnswer"""
 
     @staticmethod
     def parse_submission_raw_answer(raw_answer):
@@ -1344,11 +1488,14 @@ class OraSubmissionAnswerFactory:
         elif ZippedListSubmissionAnswer.matches(raw_answer):
             return ZippedListSubmissionAnswer(raw_answer)
         else:
-            raise VersionNotFoundException(f"No ORA Submission Answer version recognized for {raw_answer}")
+            raise VersionNotFoundException(
+                f"No ORA Submission Answer version recognized for {raw_answer}"
+            )
 
 
 class OraSubmissionAnswer:
-    """ Abstract interface for ORA Submissions """
+    """Abstract interface for ORA Submissions"""
+
     def __init__(self, raw_answer):
         self.raw_answer = raw_answer
 
@@ -1375,11 +1522,10 @@ class OraSubmissionAnswer:
 
 
 class TextOnlySubmissionAnswer(OraSubmissionAnswer):
-
     @staticmethod
     def matches(raw_answer):
         keys = list(raw_answer.keys())
-        return len(keys) == 1 and keys == ['parts']
+        return len(keys) == 1 and keys == ["parts"]
 
     def __init__(self, submission):
         super().__init__(submission)
@@ -1390,7 +1536,9 @@ class TextOnlySubmissionAnswer(OraSubmissionAnswer):
         Parse and cache text responses from the submission
         """
         if self.text_responses is None:
-            self.text_responses = [part.get('text') for part in self.raw_answer.get('parts', [])]
+            self.text_responses = [
+                part.get("text") for part in self.raw_answer.get("parts", [])
+            ]
         return self.text_responses
 
     def get_file_uploads(self, missing_blank=False):
@@ -1409,30 +1557,35 @@ class TextOnlySubmissionAnswer(OraSubmissionAnswer):
 #  -------------------------------------------------------------------------
 
 ZippedListsSubmissionVersion = namedtuple(
-    'ZippedListsSubmissionVersion',
-    ['key', 'description', 'name', 'size']
+    "ZippedListsSubmissionVersion", ["key", "description", "name", "size"]
 )
 
-VERSION_1 = ZippedListsSubmissionVersion('file_key', None, None, None)
-VERSION_2 = ZippedListsSubmissionVersion('file_keys', 'files_descriptions', None, None)
-VERSION_3 = ZippedListsSubmissionVersion('file_keys', 'files_descriptions', 'files_name', None)
+VERSION_1 = ZippedListsSubmissionVersion("file_key", None, None, None)
+VERSION_2 = ZippedListsSubmissionVersion("file_keys", "files_descriptions", None, None)
+VERSION_3 = ZippedListsSubmissionVersion(
+    "file_keys", "files_descriptions", "files_name", None
+)
 VERSION_4 = ZippedListsSubmissionVersion(
-    'file_keys', 'files_descriptions', 'files_name', 'files_sizes'
+    "file_keys", "files_descriptions", "files_name", "files_sizes"
 )
 VERSION_5 = ZippedListsSubmissionVersion(
-    'file_keys', 'files_descriptions', 'files_names', 'files_sizes'
+    "file_keys", "files_descriptions", "files_names", "files_sizes"
 )
 ZIPPED_LIST_SUBMISSION_VERSIONS = [
-    VERSION_1, VERSION_2, VERSION_3, VERSION_4, VERSION_5
+    VERSION_1,
+    VERSION_2,
+    VERSION_3,
+    VERSION_4,
+    VERSION_5,
 ]
 
 
 class VersionNotFoundException(Exception):
-    """ Raised when we are unable to resolve a given submission to a submission version """
+    """Raised when we are unable to resolve a given submission to a submission version"""
 
 
 class FileMissingException(Exception):
-    """ Raise when file is not found on generated CSV """
+    """Raise when file is not found on generated CSV"""
 
 
 class ZippedListSubmissionAnswer(OraSubmissionAnswer):
@@ -1440,6 +1593,7 @@ class ZippedListSubmissionAnswer(OraSubmissionAnswer):
     Representation of a type of ORA submission where there are multiple lists, each
     representing a field. They are "zipped" together to represent individual files.
     """
+
     CURRENT_VERSION = 5
 
     @staticmethod
@@ -1463,7 +1617,7 @@ class ZippedListSubmissionAnswer(OraSubmissionAnswer):
         version_keys = {version_key for version_key in version if version_key}
         if version_keys == submission_keys:
             return True
-        version_keys.add('parts')
+        version_keys.add("parts")
         return version_keys == submission_keys
 
     @staticmethod
@@ -1480,7 +1634,9 @@ class ZippedListSubmissionAnswer(OraSubmissionAnswer):
         for version in reversed(ZIPPED_LIST_SUBMISSION_VERSIONS):
             if ZippedListSubmissionAnswer.does_version_match(submission_keys, version):
                 return version
-        raise VersionNotFoundException(f"No zipped list version found with keys {submission_keys}")
+        raise VersionNotFoundException(
+            f"No zipped list version found with keys {submission_keys}"
+        )
 
     def __init__(self, raw_answer):
         """
@@ -1497,7 +1653,9 @@ class ZippedListSubmissionAnswer(OraSubmissionAnswer):
         Parse and cache text responses from the submission
         """
         if self.text_responses is None:
-            self.text_responses = [part.get('text') for part in self.raw_answer.get('parts', [])]
+            self.text_responses = [
+                part.get("text") for part in self.raw_answer.get("parts", [])
+            ]
         return self.text_responses
 
     def _index_safe_get(self, i, target_list, default=None):
@@ -1514,7 +1672,7 @@ class ZippedListSubmissionAnswer(OraSubmissionAnswer):
         """
         Parse and cache file upload responses from the raw_answer
         """
-        default_missing_value = '' if missing_blank else None
+        default_missing_value = "" if missing_blank else None
         if self.file_uploads is None:
             file_keys = self.raw_answer.get(self.version.key, [])
             # The very earliest version of ora submissions with files only allowed one file, and so is the only
@@ -1528,10 +1686,14 @@ class ZippedListSubmissionAnswer(OraSubmissionAnswer):
             file_sizes = self.raw_answer.get(self.version.size, [])
             for i, key in enumerate(file_keys):
                 name = self._index_safe_get(i, file_names, default_missing_value)
-                description = self._index_safe_get(i, file_descriptions, default_missing_value)
+                description = self._index_safe_get(
+                    i, file_descriptions, default_missing_value
+                )
                 size = self._index_safe_get(i, file_sizes, 0)
 
-                file_upload = SubmissionFileUpload(key, name=name, description=description, size=size)
+                file_upload = SubmissionFileUpload(
+                    key, name=name, description=description, size=size
+                )
                 files.append(file_upload)
             self.file_uploads = files
         return self.file_uploads
