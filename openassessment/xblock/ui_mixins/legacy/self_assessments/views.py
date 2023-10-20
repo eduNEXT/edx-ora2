@@ -5,6 +5,7 @@ import logging
 from webob import Response
 
 from openassessment.xblock.utils.user_data import get_user_preferences
+from openassessment.xblock.utils.retry_assessment import retry_assessment_enable
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -36,6 +37,7 @@ def render_self_assessment(api_data):
 def self_context(api_data, with_sub=False):
     config_data = api_data.config_data
     user_preferences = get_user_preferences(config_data.user_service)
+    retry_enable = retry_assessment_enable(api_data)
     context = {
         "allow_multiple_files": config_data.allow_multiple_files,
         "allow_latex": config_data.allow_latex,
@@ -43,6 +45,8 @@ def self_context(api_data, with_sub=False):
         "xblock_id": config_data.get_xblock_id(),
         "user_timezone": user_preferences["user_timezone"],
         "user_language": user_preferences["user_language"],
+        "retry_assessment_enable": retry_enable,
+        "user_id" : api_data._block.scope_ids.user_id,
     }
 
     step_data = api_data.self_assessment_data

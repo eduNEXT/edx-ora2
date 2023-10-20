@@ -5,6 +5,7 @@ from webob import Response
 from openassessment.xblock.utils.defaults import DEFAULT_RUBRIC_FEEDBACK_TEXT
 
 from openassessment.xblock.utils.user_data import get_user_preferences
+from openassessment.xblock.utils.retry_assessment import retry_assessment_enable
 
 
 template_paths = {
@@ -19,8 +20,10 @@ template_paths = {
 }
 
 
-def peer_context(config_data, step_data, peer_sub=None):
+def peer_context(api_data, step_data, peer_sub=None):
+    config_data = api_data.config_data
     user_preferences = get_user_preferences(config_data.user_service)
+    retry_enable = retry_assessment_enable(api_data)
     context_dict = {
         "rubric_criteria": config_data.rubric_criteria_with_labels,
         "allow_multiple_files": config_data.allow_multiple_files,
@@ -29,6 +32,8 @@ def peer_context(config_data, step_data, peer_sub=None):
         "user_timezone": user_preferences["user_timezone"],
         "user_language": user_preferences["user_language"],
         "xblock_id": config_data.get_xblock_id(),
+        "retry_assessment_enable": retry_enable,
+        "user_id" : api_data._block.scope_ids.user_id,
     }
 
     if config_data.rubric_feedback_prompt is not None:
@@ -98,7 +103,7 @@ def peer_path_and_context(api_data, continue_grading):
     def path_and_context(path_key, peer_sub=None):
         return (
             template_paths[path_key],
-            peer_context(api_data.config_data, step_data, peer_sub),
+            peer_context(api_data, step_data, peer_sub),
         )
 
     if step_data.is_cancelled:
