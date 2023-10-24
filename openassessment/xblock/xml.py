@@ -578,12 +578,9 @@ def parse_assessments_xml(assessments_root):
             except ValueError as ex:
                 raise UpdateFromXmlError('The "enable_flexible_grading" value must be a boolean.') from ex
 
-        # Assessment enable_mean_grading
-        if 'enable_mean_grading' in assessment.attrib:
-            try:
-                assessment_dict['enable_mean_grading'] = _parse_boolean(assessment.get('enable_mean_grading'))
-            except ValueError as ex:
-                raise UpdateFromXmlError('The "enable_mean_grading" value must be a boolean.') from ex
+        # Assessment grading_strategy
+        if 'grading_strategy' in assessment.attrib:
+            assessment_dict['grading_strategy'] = assessment.get('grading_strategy')
 
         # Assessment required
         if 'required' in assessment.attrib:
@@ -680,8 +677,8 @@ def serialize_assessments(assessments_root, oa_block):
         if 'enable_flexible_grading' in assessment_dict:
             assessment.set('enable_flexible_grading', str(assessment_dict['enable_flexible_grading']))
 
-        if 'enable_mean_grading' in assessment_dict:
-            assessment.set('enable_mean_grading', str(assessment_dict['enable_mean_grading']))
+        if 'grading_strategy' in assessment_dict:
+            assessment.set('grading_strategy', str(assessment_dict['grading_strategy']))
 
         if assessment_dict.get('start') is not None:
             assessment.set('start', str(assessment_dict['start']))

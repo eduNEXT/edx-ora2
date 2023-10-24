@@ -91,7 +91,7 @@ export class EditPeerAssessmentView {
       must_grade: this.mustGradeNum(),
       must_be_graded_by: this.mustBeGradedByNum(),
       enable_flexible_grading: this.enableFlexibleGrading(),
-      enable_mean_grading: this.enableMeanGrading(),
+      grading_strategy: this.gradingStrategy(),
       start: this.startDatetime(),
       due: this.dueDatetime(),
     };
@@ -168,17 +168,17 @@ export class EditPeerAssessmentView {
      Get or set the mean grading setting to enabled/disabled
 
      Args:
-     enabled (bool, optional): If provided, set `enable_mean_grading` to the given value
+     enabled (bool, optional): If provided, set `grading_strategy` to the given value
 
      Returns:
      boolean
      * */
-     enableMeanGrading(isEnabled) {
-      const self = $('#peer_assessment_enable_mean_grading', this.element);
-      if (isEnabled !== undefined) {
-        self.val(isEnabled ? '0' : '1');
+     gradingStrategy(strategy) {
+      const self = $('#peer_assessment_grading_strategy', this.element);
+      if (strategy !== undefined) {
+        self.val(strategy);
       }
-      return self.val() === '1';
+      return self.val();
     }
 
   /**

@@ -27,6 +27,12 @@ FLEXIBLE_PEER_GRADING_REQUIRED_SUBMISSION_AGE_IN_DAYS = 7
 FLEXIBLE_PEER_GRADING_GRADED_BY_PERCENTAGE = 30
 
 
+class GradingStrategy:
+    """Grading strategies for peer assessments."""
+    MEAN = "mean"
+    MEDIAN = "median"
+
+
 def flexible_peer_grading_enabled(peer_requirements, course_settings):
     """
     Is flexible peer grading turned on? Either at the course override
@@ -37,21 +43,11 @@ def flexible_peer_grading_enabled(peer_requirements, course_settings):
     return peer_requirements.get("enable_flexible_grading")
 
 
-def mean_peer_grading_enabled(peer_requirements):
-    """
-    Is mean peer grading turned on? Either at the course override
-    level or the block level?
-    """
-    return peer_requirements.get("enable_mean_grading")
-
-
 def get_peer_score_type(peer_requirements):
     """
     Get the peer grading type, either mean or median.
     """
-    if mean_peer_grading_enabled(peer_requirements):
-        return "mean"
-    return "median"
+    return peer_requirements.get("grading_strategy", GradingStrategy.MEDIAN)
 
 
 def required_peer_grades(submission_uuid, peer_requirements):

@@ -50,13 +50,13 @@
                 </li>
                 <li class="field comp-setting-entry">
                     <div class="wrapper-comp-setting">
-                        <label for="peer_assessment_enable_mean_grading" class="setting-label">{% trans "Enable Peer Grade Mean Calculation" %}</label>
-                        <select id="peer_assessment_enable_mean_grading" class="input setting-input">
-                            <option value="0">{% trans "False" %}</option>
-                            <option value="1" {% if assessments.peer_assessment.enable_mean_grading %}selected="true"{% endif %}>{% trans "True" %}</option>
+                        <label for="peer_assessment_grading_strategy" class="setting-label">{% trans "Grading strategy for the peer assessment" %}</label>
+                        <select id="peer_assessment_grading_strategy" class="input setting-input">
+                            <option value="mean" {% if assessments.peer_assessment.grading_strategy == 'mean' %}selected="true"{% endif %}>{% trans "Mean" %}</option>
+                            <option value="median" {% if assessments.peer_assessment.grading_strategy == 'median' %}selected="true"{% endif %}>{% trans "Median (default)" %}</option>
                         </select>
                     </div>
-                    <p class="setting-help">{% trans "When enabled, the mean is used instead of the median when calculating peer scores." %}</p>
+                    <p class="setting-help">{% trans "Select the preferred grading strategy." %}</p>
                 </li>
             </ul>
         </div>

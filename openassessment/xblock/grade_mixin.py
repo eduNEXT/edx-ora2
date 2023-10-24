@@ -9,7 +9,7 @@ from lazy import lazy
 from xblock.core import XBlock
 
 from django.utils.translation import gettext as _
-from openassessment.assessment.api.peer import mean_peer_grading_enabled, get_peer_score_type
+from openassessment.assessment.api.peer import get_peer_score_type
 
 from openassessment.assessment.errors import PeerAssessmentError, SelfAssessmentError
 
