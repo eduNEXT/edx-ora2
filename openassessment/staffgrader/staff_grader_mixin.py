@@ -199,8 +199,6 @@ class StaffGraderMixin:
                 log.exception("Failed to serialize workflow %d: %s", staff_workflow.id, str(e), exc_info=True)
         return result
 
-
-
     @XBlock.json_handler
     @require_course_staff("STUDENT_GRADE")
     def list_assessments(self, data, suffix=''):  # pylint: disable=unused-argument
@@ -224,16 +222,15 @@ class StaffGraderMixin:
             given by the owner of the 'submission_uuid' for other submissions in the same item.
         """
         item_id = data['item_id']
-        subission_uuid = data['submission_uuid']
+        submission_uuid = data['submission_uuid']
         filter_value = data['assessment_filter']
 
         if filter_value == "received":
-            return generate_received_assessment_data(subission_uuid)
+            return generate_received_assessment_data(submission_uuid)
         elif filter_value == "given":
-            return generate_given_assessment_data(item_id, subission_uuid)
+            return generate_given_assessment_data(item_id, submission_uuid)
         else:
             raise ValueError("Invalid assessment_filter value")
-
 
     def _get_list_workflows_serializer_context(self, staff_workflows, is_team_assignment=False):
         """

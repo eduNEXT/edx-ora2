@@ -1660,7 +1660,7 @@ def generate_assessment_data(assessment_list, user_data_mapping):
             "scorer_name": scorer_name,
             "scorer_username": scorer_username,
             "scorer_email": scorer_email,
-            "assesment_date": assessment.scored_at.strftime('%d-%m-%Y'),
+            "assesment_date": str(assessment.scored_at),
             "assesment_scores": parts_summary(assessment),
             "problem_step": score_type_to_string(assessment.score_type),
             "feedback": assessment.feedback or ''
