@@ -97,6 +97,7 @@ def map_anonymized_ids_to_usernames(anonymized_ids):
 
     return anonymous_id_to_username_mapping
 
+
 def map_anonymized_ids_to_user_data(anonymized_ids):
     """
     Args:
@@ -125,6 +126,7 @@ def map_anonymized_ids_to_user_data(anonymized_ids):
         } for user in users
     }
     return anonymous_id_to_user_info_mapping
+
 
 class CsvWriter:
     """
@@ -1585,8 +1587,9 @@ def score_type_to_string(score_type):
         PEER_TYPE: "Peer",
         SELF_TYPE: "Self",
         STAFF_TYPE: "Staff",
-        }
+    }
     return SCORE_TYPE_MAP.get(score_type, "Unknown")
+
 
 def parts_summary(assessment_obj):
     """
@@ -1606,6 +1609,7 @@ def parts_summary(assessment_obj):
         }
         for part in assessment_obj.parts.all()
     ]
+
 
 def get_scorer_data(anonymous_scorer_id, user_data_mapping):
     """
@@ -1630,7 +1634,8 @@ def get_scorer_data(anonymous_scorer_id, user_data_mapping):
         scorer_data.get('fullname', ""),
         scorer_data.get('username', ""),
         scorer_data.get('email', "")
-        )
+    )
+
 
 def generate_assessment_data(assessment_list, user_data_mapping):
     """
@@ -1667,6 +1672,7 @@ def generate_assessment_data(assessment_list, user_data_mapping):
         })
     return assessment_data_list
 
+
 def generate_received_assessment_data(submission_uuid):
     """
     Generates a list of received assessments data based on the submission UUID.
@@ -1677,8 +1683,6 @@ def generate_received_assessment_data(submission_uuid):
     Returns:
         list[dict]: A list containing assessment data dictionaries.
     """
-
-
     submission = sub_api.get_submission_and_student(submission_uuid)
 
     if not submission:
@@ -1725,5 +1729,7 @@ def generate_given_assessment_data(item_id, submission_uuid):
         .filter(scorer_id=scorer_id, submission_uuid__in=submission_uuids)
     )
 
-    user_data_mapping = map_anonymized_ids_to_user_data([assessment.scorer_id for assessment in assessments_made_by_student])
+    user_data_mapping = map_anonymized_ids_to_user_data(
+        [assessment.scorer_id for assessment in assessments_made_by_student]
+    )
     return generate_assessment_data(assessments_made_by_student, user_data_mapping)

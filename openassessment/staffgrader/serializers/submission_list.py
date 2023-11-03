@@ -208,7 +208,6 @@ class TeamSubmissionListSerializer(SubmissionListSerializer):
         # For team submissions, this is intentionally empty
         return None
 
-
     def get_teamName(self, workflow):
         return self._get_team_name_from_context(
             self._get_team_id_from_context(workflow.identifying_uuid)
