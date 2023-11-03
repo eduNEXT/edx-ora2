@@ -246,6 +246,7 @@ class StaffGraderMixin:
 
         context = {}
 
+        # Fetch user identifier mappings
         if is_team_assignment:
             # Look up the team IDs for submissions so we can later map to team names
             team_submission_uuid_to_team_id = get_team_ids_by_team_submission_uuid(submission_uuids)
@@ -270,9 +271,12 @@ class StaffGraderMixin:
             all_anonymous_ids |= set(context['submission_uuid_to_student_id'].values())
 
         anonymous_id_to_user_data = map_anonymized_ids_to_user_data(all_anonymous_ids)
-        anonymous_id_to_username = {key: val["username"] for key, val in anonymous_id_to_user_data.items()}
-        anonymous_id_to_email = {key: val["email"] for key, val in anonymous_id_to_user_data.items()}
-        anonymous_id_to_fullname = {key: val["fullname"] for key, val in anonymous_id_to_user_data.items()}
+
+        anonymous_id_to_username, anonymous_id_to_email, anonymous_id_to_fullname = {}, {}, {}
+        for anonymous_id, user_data in anonymous_id_to_user_data.items():
+            anonymous_id_to_username[anonymous_id] = user_data["username"]
+            anonymous_id_to_email[anonymous_id] = user_data["email"]
+            anonymous_id_to_fullname[anonymous_id] = user_data["fullname"]
 
         # Do a bulk fetch of the assessments linked to the workflows, including all connected
         # Rubric, Criteria, and Option models
@@ -286,6 +290,7 @@ class StaffGraderMixin:
                 "submission_uuid_to_assessment": submission_uuid_to_assessment,
             }
         )
+
         return context
 
     def _bulk_fetch_annotated_staff_workflows(self, is_team_assignment=False):

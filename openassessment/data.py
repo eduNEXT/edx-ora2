@@ -112,6 +112,7 @@ def map_anonymized_ids_to_user_data(anonymized_ids):
         }
         """
     User = get_user_model()
+
     users = _use_read_replica(
         User.objects.filter(anonymoususerid__anonymous_user_id__in=anonymized_ids)
         .select_related("profile")
