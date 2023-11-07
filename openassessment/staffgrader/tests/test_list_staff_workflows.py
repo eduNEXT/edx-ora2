@@ -47,7 +47,7 @@ SUBMITTED_DATE = datetime(2020, 3, 2, 12, 35, tzinfo=timezone.utc)
 TEST_START_DATE = SUBMITTED_DATE + timedelta(days=2)
 POINTS_POSSIBLE = 6
 
-TestUser = namedtuple("TestUser", ['username', 'student_id', 'submission'])
+TestUser = namedtuple("TestUser", ['username', 'email', 'fullname', 'student_id', 'submission'])
 TestTeam = namedtuple("TestTeam", ['team_name', 'team_id', 'member_ids', 'team_submission'])
 MockAnnotatedStaffWorkflow = namedtuple("MockAnnotatedStaffWorkflow", EXPECTED_ANNOTATED_WORKFLOW_FIELDS)
 
@@ -87,12 +87,23 @@ class TestStaffWorkflowListViewBase(XBlockHandlerTestCase):
             test_user.student_id: test_user.username
             for test_user in cls.students + cls.course_staff
         }
+        cls.student_id_to_user_data_map = {
+            test_user.student_id: {
+                'username': test_user.username,
+                'email': test_user.email,
+                'fullname': test_user.fullname,
+            }
+            for test_user in cls.students + cls.course_staff
+        }
         # These are just values that are going to be used several times, so also calculate them and store them now
         cls.submission_uuids = {student.submission['uuid'] for student in cls.students}
 
     @classmethod
     def _create_test_user(cls, identifier, user_type, create_submission=True):
-        """ Create a TestUser, a namedtuple with a student_id, username, and potentially a submission """
+        """
+        Create a TestUser, a namedtuple with a student_id, username, email,
+        fullname and potentially a submission
+        """
         student_id = f"SWLV_{user_type}_{identifier}_student_id"
         if create_submission:
             student_item = cls._student_item(student_id)
@@ -102,6 +113,8 @@ class TestStaffWorkflowListViewBase(XBlockHandlerTestCase):
             submission = None
         return TestUser(
             username=f"SWLV_{user_type}_{identifier}_username",
+            email=f"SWLV_{user_type}_{identifier}_email",
+            fullname=f"SWLV_{user_type}_{identifier}_fullname",
             student_id=student_id,
             submission=submission,
         )
@@ -159,18 +172,9 @@ class TestStaffWorkflowListViewBase(XBlockHandlerTestCase):
         returns a mapping from student IDs to a dictionary containing
         username, email, and fullname.
         """
-        mock_data = {
-            student_id: {
-                "username": self.student_id_to_username_map.get(student_id, ""),
-                "email": "mocked_email@example.com",
-                "fullname": "Mocked Full Name",
-            }
-            for student_id in self.student_id_to_username_map
-        }
-
         with patch(
             'openassessment.staffgrader.staff_grader_mixin.map_anonymized_ids_to_user_data',
-            return_value=mock_data
+            return_value=self.student_id_to_user_data_map
         ) as patched_map:
             yield patched_map
 
@@ -248,6 +252,8 @@ class TestStaffWorkflowListViewBase(XBlockHandlerTestCase):
             'gradingStatus': 'ungraded' if not date_graded else 'graded',
             'lockStatus': lock_status,
             'username': student.username if not team else None,
+            'email': student.email if not team else None,
+            'fullname': student.fullname if not team else None,
             'teamName': team.team_name if team else None,
             'score': score,
         }
@@ -312,7 +318,7 @@ class StaffWorkflowListViewIntegrationTests(TestStaffWorkflowListViewBase):
     def test_no_grades_or_locks(self, xblock):
         """ Test for the result of calling the view for an ORA with no grades or locks"""
         self.set_staff_user(xblock)
-        with self._mock_map_anonymized_ids_to_usernames():
+        with self._mock_map_anonymized_ids_to_user_data():
             response = self.request(xblock, 'list_staff_workflows', json.dumps({}), response_format='json')
         expected_response = {}
         for student in self.students:
@@ -327,7 +333,7 @@ class StaffWorkflowListViewIntegrationTests(TestStaffWorkflowListViewBase):
         self.setup_completed_assessments(xblock, grading_config)
 
         self.set_staff_user(xblock)
-        with self._mock_map_anonymized_ids_to_usernames():
+        with self._mock_map_anonymized_ids_to_user_data():
             response = self.request(xblock, 'list_staff_workflows', json.dumps({}), response_format='json')
 
         expected = {}
@@ -346,7 +352,7 @@ class StaffWorkflowListViewIntegrationTests(TestStaffWorkflowListViewBase):
         self.setup_active_locks(lock_config)
 
         self.set_staff_user(xblock)
-        with self._mock_map_anonymized_ids_to_usernames():
+        with self._mock_map_anonymized_ids_to_user_data():
             response = self.request(xblock, 'list_staff_workflows', json.dumps({}), response_format='json')
 
         expected = {}
@@ -443,7 +449,7 @@ class StaffWorkflowListViewTeamTests(TestStaffWorkflowListViewBase):
         mock_get_team_ids_by_submission.return_value = self.team_ids_by_submission_id
         # pylint: disable=unused-argument, protected-access
         xblock.runtime._services['teams'] = Mock(get_team_names=lambda a, b: self.team_names_by_team_id)
-        with self._mock_map_anonymized_ids_to_usernames():
+        with self._mock_map_anonymized_ids_to_user_data():
             response = self.request(xblock, 'list_staff_workflows', "{}", response_format='response')
 
         response_body = json.loads(response.body.decode('utf-8'))
