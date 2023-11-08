@@ -2,6 +2,7 @@
 API endpoints for enhanced staff grader
 """
 from functools import wraps
+from http import HTTPStatus
 import logging
 
 from django.db.models import Case, OuterRef, Prefetch, Subquery, Value, When
@@ -230,7 +231,7 @@ class StaffGraderMixin:
         elif filter_value == "given":
             return generate_given_assessment_data(item_id, submission_uuid)
         else:
-            raise ValueError("Invalid assessment_filter value")
+            raise JsonHandlerError(HTTPStatus.BAD_REQUEST, "Invalid assessment_filter value")
 
     def _get_list_workflows_serializer_context(self, staff_workflows, is_team_assignment=False):
         """
