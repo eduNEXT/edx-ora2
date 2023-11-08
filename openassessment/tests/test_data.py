@@ -85,8 +85,16 @@ USER_DATA_MAPPING = {
     STUDENT_ID: {"username": STUDENT_USERNAME, "email": STUDENT_EMAIL, "fullname": STUDENT_FULL_NAME},
     SCORER_ID: {"username": SCORER_USERNAME, "email": SCORER_EMAIL, "fullname": SCORER_FULL_NAME},
     TEST_SCORER_ID: {"username": TEST_SCORER_USERNAME, "email": TEST_SCORER_EMAIL, "fullname": TEST_SCORER_FULL_NAME},
-    PRE_FILE_SIZE_STUDENT_ID: {"username": PRE_FILE_SIZE_STUDENT_USERNAME, "email": PRE_FILE_SIZE_STUDENT_EMAIL, "fullname": PRE_FILE_SIZE_STUDENT_FULL_NAME},
-    PRE_FILE_NAME_STUDENT_ID: {"username": PRE_FILE_NAME_STUDENT_USERNAME, "email": PRE_FILE_NAME_STUDENT_EMAIL, "fullname": PRE_FILE_NAME_STUDENT_FULL_NAME},
+    PRE_FILE_SIZE_STUDENT_ID: {
+        "username": PRE_FILE_SIZE_STUDENT_USERNAME,
+        "email": PRE_FILE_SIZE_STUDENT_EMAIL,
+        "fullname": PRE_FILE_SIZE_STUDENT_FULL_NAME,
+    },
+    PRE_FILE_NAME_STUDENT_ID: {
+        "username": PRE_FILE_NAME_STUDENT_USERNAME,
+        "email": PRE_FILE_NAME_STUDENT_EMAIL,
+        "fullname": PRE_FILE_NAME_STUDENT_FULL_NAME,
+    },
 }
 
 ITEM_ID = "item"
@@ -408,38 +416,38 @@ class TestOraAggregateData(TransactionCacheResetTest):
     def test_map_anonymized_ids_to_user_data(self):
         with patch('openassessment.data.get_user_model') as get_user_model_mock:
             get_user_model_mock.return_value.objects.filter.return_value \
-            .select_related.return_value.annotate.return_value.values.return_value = [
-                {
-                    'anonymous_id': STUDENT_ID,
-                    'username': STUDENT_USERNAME,
-                    'email': STUDENT_EMAIL,
-                    'profile__name': STUDENT_FULL_NAME,
-                },
-                {
-                    'anonymous_id': PRE_FILE_SIZE_STUDENT_ID,
-                    'username': PRE_FILE_SIZE_STUDENT_USERNAME,
-                    'email': PRE_FILE_SIZE_STUDENT_EMAIL,
-                    'profile__name': PRE_FILE_SIZE_STUDENT_FULL_NAME,
-                },
-                {
-                    'anonymous_id': PRE_FILE_NAME_STUDENT_ID,
-                    'username': PRE_FILE_NAME_STUDENT_USERNAME,
-                    'email': PRE_FILE_NAME_STUDENT_EMAIL,
-                    'profile__name': PRE_FILE_NAME_STUDENT_FULL_NAME,
-                },
-                {
-                    'anonymous_id': SCORER_ID,
-                    'username': SCORER_USERNAME,
-                    'email': SCORER_EMAIL,
-                    'profile__name': SCORER_FULL_NAME,
-                },
-                {
-                    'anonymous_id': TEST_SCORER_ID,
-                    'username': TEST_SCORER_USERNAME,
-                    'email': TEST_SCORER_EMAIL,
-                    'profile__name': TEST_SCORER_FULL_NAME,
-                },
-            ]
+                .select_related.return_value.annotate.return_value.values.return_value = [
+                    {
+                        'anonymous_id': STUDENT_ID,
+                        'username': STUDENT_USERNAME,
+                        'email': STUDENT_EMAIL,
+                        'profile__name': STUDENT_FULL_NAME,
+                    },
+                    {
+                        'anonymous_id': PRE_FILE_SIZE_STUDENT_ID,
+                        'username': PRE_FILE_SIZE_STUDENT_USERNAME,
+                        'email': PRE_FILE_SIZE_STUDENT_EMAIL,
+                        'profile__name': PRE_FILE_SIZE_STUDENT_FULL_NAME,
+                    },
+                    {
+                        'anonymous_id': PRE_FILE_NAME_STUDENT_ID,
+                        'username': PRE_FILE_NAME_STUDENT_USERNAME,
+                        'email': PRE_FILE_NAME_STUDENT_EMAIL,
+                        'profile__name': PRE_FILE_NAME_STUDENT_FULL_NAME,
+                    },
+                    {
+                        'anonymous_id': SCORER_ID,
+                        'username': SCORER_USERNAME,
+                        'email': SCORER_EMAIL,
+                        'profile__name': SCORER_FULL_NAME,
+                    },
+                    {
+                        'anonymous_id': TEST_SCORER_ID,
+                        'username': TEST_SCORER_USERNAME,
+                        'email': TEST_SCORER_EMAIL,
+                        'profile__name': TEST_SCORER_FULL_NAME,
+                    },
+                ]
 
             # pylint: disable=protected-access
             mapping = map_anonymized_ids_to_user_data(
