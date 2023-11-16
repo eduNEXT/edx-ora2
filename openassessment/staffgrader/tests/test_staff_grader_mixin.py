@@ -239,7 +239,7 @@ class TestStaffGraderMixin(XBlockHandlerTestCase):
         request_data = {
             "item_id": "test_item_id",
             "submission_uuid": uuid4().hex,
-            "assessment_filter": "received",
+            "assessment_type": "received",
         }
         response = self.request(
             xblock,
@@ -261,7 +261,7 @@ class TestStaffGraderMixin(XBlockHandlerTestCase):
         request_data = {
             "item_id": "test_item_id",
             "submission_uuid": uuid4().hex,
-            "assessment_filter": "given",
+            "assessment_type": "given",
         }
         response = self.request(
             xblock,
@@ -276,13 +276,13 @@ class TestStaffGraderMixin(XBlockHandlerTestCase):
 
     @scenario('data/basic_scenario.xml', user_id="staff")
     def test_list_assessments_bad_param(self, xblock):
-        """ List assessments fails if assessment_filter is not a string or is not valid """
+        """ List assessments fails if assessment_type is not a string or is not valid """
         xblock.xmodule_runtime = Mock(user_is_staff=True, anonymous_student_id=self.staff_user_id)
 
         request_data = {
             "item_id": "test_item_id",
             "submission_uuid": uuid4().hex,
-            "assessment_filter": "foo",
+            "assessment_type": "foo",
         }
         response = self.request(
             xblock,
@@ -294,7 +294,7 @@ class TestStaffGraderMixin(XBlockHandlerTestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
         self.assertDictEqual(response_body, {
-            "error": "Invalid assessment_filter value"
+            "error": "Invalid assessment_type value"
         })
 
     @scenario('data/basic_scenario.xml', user_id="staff")
