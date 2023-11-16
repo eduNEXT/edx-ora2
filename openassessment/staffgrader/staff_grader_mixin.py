@@ -204,34 +204,34 @@ class StaffGraderMixin:
     @require_course_staff("STUDENT_GRADE")
     def list_assessments(self, data, suffix=''):  # pylint: disable=unused-argument
         """
-        List the assessments' grades based on the type (received or given) for a specific submission.
+        List the assessments grades based on the type (received or given) for a specific submission.
 
         Args:
             data (dict): Contains the necessary information to fetch the assessments.
-                        - 'item_id': The ID of the xblock/item.
-                        - 'submission_uuid': The UUID of the submission.
-                        - 'assessment_filter': A string, either "received" or any other value
-                                            to determine the type of assessments to retrieve.
+                - 'item_id': The ID of the xblock/item.
+                - 'submission_uuid': The UUID of the submission.
+                - 'assessment_type': A string, either "received" or any other
+                    value to determine the type of assessments to retrieve.
 
         Returns:
             list[dict]: A list of dictionaries, each representing an assessment's data.
 
         Note:
-            - If 'assessment_filter' is "received", the function fetches assessments received
+            - If 'assessment_type' is "received", the function fetches assessments received
             for the given 'submission_uuid'.
-            - For any other value of 'assessment_filter', the function fetches assessments
+            - For any other value of 'assessment_type', the function fetches assessments
             given by the owner of the 'submission_uuid' for other submissions in the same item.
         """
         item_id = data['item_id']
         submission_uuid = data['submission_uuid']
-        filter_value = data['assessment_filter']
+        assessment_type = data['assessment_type']
 
-        if filter_value == "received":
+        if assessment_type == "received":
             return generate_received_assessment_data(submission_uuid)
-        elif filter_value == "given":
+        elif assessment_type == "given":
             return generate_given_assessment_data(item_id, submission_uuid)
         else:
-            raise JsonHandlerError(HTTPStatus.BAD_REQUEST, "Invalid assessment_filter value")
+            raise JsonHandlerError(HTTPStatus.BAD_REQUEST, "Invalid assessment_type value")
 
     def _get_list_workflows_serializer_context(self, staff_workflows, is_team_assignment=False):
         """
