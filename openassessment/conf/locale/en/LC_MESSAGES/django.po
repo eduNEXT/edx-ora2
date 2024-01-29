@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-ora2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-21 22:21+0000\n"
+"POT-Creation-Date: 2024-01-29 13:20-0400\n"
 "PO-Revision-Date: 2014-06-04 15:41-0400\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
@@ -49,96 +49,96 @@ msgstr ""
 msgid "Example {example_number} is missing an option for \"{criterion_name}\""
 msgstr ""
 
-#: data.py:534
+#: data.py:567
 #, python-brace-format
 msgid "Criterion {number}: {label}"
 msgstr ""
 
-#: data.py:536
+#: data.py:569
 #, python-brace-format
 msgid "Points {number}"
 msgstr ""
 
-#: data.py:537
+#: data.py:570
 #, python-brace-format
 msgid "Median Score {number}"
 msgstr ""
 
-#: data.py:538
+#: data.py:571
 #, python-brace-format
 msgid "Feedback {number}"
 msgstr ""
 
-#: data.py:867
+#: data.py:900
 msgid "Item ID"
 msgstr ""
 
-#: data.py:868
+#: data.py:901
 msgid "Submission ID"
 msgstr ""
 
-#: data.py:880
+#: data.py:913
 msgid "Anonymized Student ID"
 msgstr ""
 
-#: data.py:911
+#: data.py:944
 msgid "Assessment ID"
 msgstr ""
 
-#: data.py:912
+#: data.py:945
 msgid "Assessment Scored Date"
 msgstr ""
 
-#: data.py:913
+#: data.py:946
 msgid "Assessment Scored Time"
 msgstr ""
 
-#: data.py:914
+#: data.py:947
 msgid "Assessment Type"
 msgstr ""
 
-#: data.py:915
+#: data.py:948
 msgid "Anonymous Scorer Id"
 msgstr ""
 
-#: data.py:917
+#: data.py:950
 #: templates/legacy/staff_area/oa_student_info_assessment_detail.html:59
 msgid "Overall Feedback"
 msgstr ""
 
-#: data.py:918
+#: data.py:951
 msgid "Assessment Score Earned"
 msgstr ""
 
-#: data.py:919
+#: data.py:952
 msgid "Assessment Scored At"
 msgstr ""
 
-#: data.py:920
+#: data.py:953
 msgid "Date/Time Final Score Given"
 msgstr ""
 
-#: data.py:921
+#: data.py:954
 msgid "Final Score Earned"
 msgstr ""
 
-#: data.py:922
+#: data.py:955
 msgid "Final Score Possible"
 msgstr ""
 
-#: data.py:923
+#: data.py:956
 msgid "Feedback Statements Selected"
 msgstr ""
 
-#: data.py:924
+#: data.py:957
 msgid "Feedback on Assessment"
 msgstr ""
 
-#: data.py:926
+#: data.py:959
 msgid "Response Files"
 msgstr ""
 
-#: data.py:1317
+#: data.py:1350
 msgid "No description provided."
 msgstr ""
 
@@ -462,6 +462,22 @@ msgid ""
 "This feature is being enabled by the course-level setting. It can be found "
 "under the Open Response Assessment Settings card on the Pages & Resources "
 "studio page."
+msgstr ""
+
+#: templates/legacy/edit/oa_edit_peer_assessment.html:59
+msgid "Grading strategy for the peer assessment"
+msgstr ""
+
+#: templates/legacy/edit/oa_edit_peer_assessment.html:61
+msgid "Mean"
+msgstr ""
+
+#: templates/legacy/edit/oa_edit_peer_assessment.html:62
+msgid "Median (default)"
+msgstr ""
+
+#: templates/legacy/edit/oa_edit_peer_assessment.html:65
+msgid "Select the preferred grading strategy."
 msgstr ""
 
 #: templates/legacy/edit/oa_edit_peer_assessment_schedule.html:5
@@ -1075,8 +1091,8 @@ msgstr ""
 msgid ""
 "\n"
 "            This is a team assignment for team-set \"%(teamset_name)s\".\n"
-"            You are currently not on a team in team-set \"%(teamset_name)s"
-"\".\n"
+"            You are currently not on a team in team-set "
+"\"%(teamset_name)s\".\n"
 "            You must be on a team in team-set \"%(teamset_name)s\" to access "
 "this team assignment.\n"
 "            "
@@ -1110,14 +1126,14 @@ msgstr ""
 msgid "The instructions for this step could not be loaded."
 msgstr ""
 
-#: templates/legacy/oa_base.html:15 templates/openassessmentblock/base.html:21
+#: templates/legacy/oa_base.html:16 templates/openassessmentblock/base.html:36
 msgid ""
 "This assignment has several steps. In the first step, you'll provide a "
 "response to the prompt. The other steps appear below the Your Response field."
 msgstr ""
 
-#: templates/legacy/oa_base.html:36 templates/openassessmentblock/base.html:42
-#: templates/openassessmentblock/base.html:82
+#: templates/legacy/oa_base.html:37 templates/openassessmentblock/base.html:70
+#: templates/openassessmentblock/base.html:114
 msgid "Loading"
 msgstr ""
 
@@ -1176,8 +1192,8 @@ msgid ""
 "\n"
 "            <span id=\"oa_step_deadline_peer\" class=\"date ora-datetime\" "
 "data-datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1188,8 +1204,8 @@ msgid ""
 "\n"
 "            <span id=\"oa_step_deadline_peer\" class=\"date ora-datetime\" "
 "data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1313,10 +1329,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"            <span id=\"oa_step_deadline_response\" class=\"date ora-datetime"
-"\" data-datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"            <span id=\"oa_step_deadline_response\" class=\"date ora-"
+"datetime\" data-datetime=\"%(start_date)s\" data-string=\"available {date} "
+"(in %(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1325,10 +1341,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"            <span id=\"oa_step_deadline_response\" class=\"date ora-datetime"
-"\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"            <span id=\"oa_step_deadline_response\" class=\"date ora-"
+"datetime\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1553,8 +1569,9 @@ msgstr ""
 #: templates/legacy/response/oa_response.html:314
 msgid ""
 "\n"
-"                  Learn more about team assignments here: (<a target=\"_blank"
-"\" href=\"https://support.edx.org/hc/en-us/articles/360000191067-Submit-your-"
+"                  Learn more about team assignments here: (<a "
+"target=\"_blank\" href=\"https://support.edx.org/hc/en-us/"
+"articles/360000191067-Submit-your-"
 "response#h_01FVD8SXM9E5H2DNAG87X25ZHR\">link</a>)\n"
 "                  "
 msgstr ""
@@ -1690,10 +1707,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"               <span id=\"oa_step_deadline_self\" class=\"date ora-datetime"
-"\" data-datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"               <span id=\"oa_step_deadline_self\" class=\"date ora-"
+"datetime\" data-datetime=\"%(start_date)s\" data-string=\"available {date} "
+"(in %(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "           "
 msgstr ""
 
@@ -1702,10 +1719,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"               <span id=\"oa_step_deadline_self\" class=\"date ora-datetime"
-"\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"               <span id=\"oa_step_deadline_self\" class=\"date ora-"
+"datetime\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "           "
 msgstr ""
 
@@ -1720,7 +1737,7 @@ msgid ""
 "will receive a grade of Incomplete."
 msgstr ""
 
-#: templates/legacy/staff/oa_staff_grade.html:13 xblock/grade_mixin.py:365
+#: templates/legacy/staff/oa_staff_grade.html:13 xblock/grade_mixin.py:367
 msgid "Staff Grade"
 msgstr ""
 
@@ -2122,8 +2139,8 @@ msgid ""
 "\n"
 "            <span id=\"oa_step_deadline\" class=\"date ora-datetime\" data-"
 "datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -2203,85 +2220,86 @@ msgstr ""
 msgid "The Learner Training Step of this assignment could not be loaded."
 msgstr ""
 
-#: xblock/grade_mixin.py:77 xblock/leaderboard_mixin.py:61
+#: xblock/grade_mixin.py:78 xblock/leaderboard_mixin.py:61
 msgid "An unexpected error occurred."
 msgstr ""
 
-#: xblock/grade_mixin.py:179
+#: xblock/grade_mixin.py:180
 msgid "Peer Assessment"
 msgstr ""
 
-#: xblock/grade_mixin.py:181
+#: xblock/grade_mixin.py:182
 msgid "Self Assessment"
 msgstr ""
 
-#: xblock/grade_mixin.py:221
+#: xblock/grade_mixin.py:222
 msgid "Assessment feedback could not be saved."
 msgstr ""
 
-#: xblock/grade_mixin.py:232
+#: xblock/grade_mixin.py:233
 msgid "Feedback saved."
 msgstr ""
 
-#: xblock/grade_mixin.py:366 xblock/grade_mixin.py:512
+#: xblock/grade_mixin.py:368 xblock/grade_mixin.py:516
 msgid "Staff Comments"
 msgstr ""
 
-#: xblock/grade_mixin.py:372
-msgid "Peer Median Grade"
+#: xblock/grade_mixin.py:375
+msgid "Peer {score_type.capitalize()} Grade"
 msgstr ""
 
-#: xblock/grade_mixin.py:377 xblock/grade_mixin.py:519
+#: xblock/grade_mixin.py:380 xblock/grade_mixin.py:523
 #, python-brace-format
 msgid "Peer {peer_index}"
 msgstr ""
 
-#: xblock/grade_mixin.py:378
+#: xblock/grade_mixin.py:381
 msgid "Peer Comments"
 msgstr ""
 
-#: xblock/grade_mixin.py:388
+#: xblock/grade_mixin.py:391
 msgid "Self Assessment Grade"
 msgstr ""
 
-#: xblock/grade_mixin.py:388
+#: xblock/grade_mixin.py:391
 msgid "Your Self Assessment"
 msgstr ""
 
-#: xblock/grade_mixin.py:389 xblock/grade_mixin.py:531
+#: xblock/grade_mixin.py:392 xblock/grade_mixin.py:535
 msgid "Your Comments"
 msgstr ""
 
-#: xblock/grade_mixin.py:485
+#: xblock/grade_mixin.py:489
 msgid "Waiting for peer reviews"
 msgstr ""
 
-#: xblock/grade_mixin.py:524
+#: xblock/grade_mixin.py:528
 msgid "Peer"
 msgstr ""
 
-#: xblock/grade_mixin.py:655
+#: xblock/grade_mixin.py:659
 msgid "The grade for this problem is determined by your Staff Grade."
 msgstr ""
 
-#: xblock/grade_mixin.py:657
+#: xblock/grade_mixin.py:661
+#, python-brace-format
 msgid ""
-"The grade for this problem is determined by the median score of your Peer "
-"Assessments."
+"The grade for this problem is determined by the {score_type} score of your "
+"Peer Assessments."
 msgstr ""
 
-#: xblock/grade_mixin.py:660
+#: xblock/grade_mixin.py:664
 msgid "The grade for this problem is determined by your Self Assessment."
 msgstr ""
 
-#: xblock/grade_mixin.py:666
+#: xblock/grade_mixin.py:670
 #, python-brace-format
 msgid ""
 "You have successfully completed this problem and received a {earned_points}/"
 "{total_points}."
 msgstr ""
 
-#: xblock/grade_mixin.py:674
+#: xblock/grade_mixin.py:678
 msgid ""
 "You have not yet received all necessary peer reviews to determine your final "
 "grade."
