@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-ora2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-06 21:24+0000\n"
+"POT-Creation-Date: 2024-01-31 11:50-0400\n"
 "PO-Revision-Date: 2014-06-04 15:41-0400\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
@@ -49,96 +49,96 @@ msgstr ""
 msgid "Example {example_number} is missing an option for \"{criterion_name}\""
 msgstr ""
 
-#: data.py:533
+#: data.py:566
 #, python-brace-format
 msgid "Criterion {number}: {label}"
 msgstr ""
 
-#: data.py:535
+#: data.py:568
 #, python-brace-format
 msgid "Points {number}"
 msgstr ""
 
-#: data.py:536
+#: data.py:569
 #, python-brace-format
 msgid "Median Score {number}"
 msgstr ""
 
-#: data.py:537
+#: data.py:570
 #, python-brace-format
 msgid "Feedback {number}"
 msgstr ""
 
-#: data.py:866
+#: data.py:899
 msgid "Item ID"
 msgstr ""
 
-#: data.py:867
+#: data.py:900
 msgid "Submission ID"
 msgstr ""
 
-#: data.py:879
+#: data.py:912
 msgid "Anonymized Student ID"
 msgstr ""
 
-#: data.py:910
+#: data.py:943
 msgid "Assessment ID"
 msgstr ""
 
-#: data.py:911
+#: data.py:944
 msgid "Assessment Scored Date"
 msgstr ""
 
-#: data.py:912
+#: data.py:945
 msgid "Assessment Scored Time"
 msgstr ""
 
-#: data.py:913
+#: data.py:946
 msgid "Assessment Type"
 msgstr ""
 
-#: data.py:914
+#: data.py:947
 msgid "Anonymous Scorer Id"
 msgstr ""
 
-#: data.py:916
+#: data.py:949
 #: templates/openassessmentblock/staff_area/oa_student_info_assessment_detail.html:59
 msgid "Overall Feedback"
 msgstr ""
 
-#: data.py:917
+#: data.py:950
 msgid "Assessment Score Earned"
 msgstr ""
 
-#: data.py:918
+#: data.py:951
 msgid "Assessment Scored At"
 msgstr ""
 
-#: data.py:919
+#: data.py:952
 msgid "Date/Time Final Score Given"
 msgstr ""
 
-#: data.py:920
+#: data.py:953
 msgid "Final Score Earned"
 msgstr ""
 
-#: data.py:921
+#: data.py:954
 msgid "Final Score Possible"
 msgstr ""
 
-#: data.py:922
+#: data.py:955
 msgid "Feedback Statements Selected"
 msgstr ""
 
-#: data.py:923
+#: data.py:956
 msgid "Feedback on Assessment"
 msgstr ""
 
-#: data.py:925
+#: data.py:958
 msgid "Response Files"
 msgstr ""
 
-#: data.py:1316
+#: data.py:1349
 msgid "No description provided."
 msgstr ""
 
@@ -1077,8 +1077,8 @@ msgstr ""
 msgid ""
 "\n"
 "            This is a team assignment for team-set \"%(teamset_name)s\".\n"
-"            You are currently not on a team in team-set \"%(teamset_name)s"
-"\".\n"
+"            You are currently not on a team in team-set "
+"\"%(teamset_name)s\".\n"
 "            You must be on a team in team-set \"%(teamset_name)s\" to access "
 "this team assignment.\n"
 "            "
@@ -1177,8 +1177,8 @@ msgid ""
 "\n"
 "            <span id=\"oa_step_deadline_peer\" class=\"date ora-datetime\" "
 "data-datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1189,8 +1189,8 @@ msgid ""
 "\n"
 "            <span id=\"oa_step_deadline_peer\" class=\"date ora-datetime\" "
 "data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1314,10 +1314,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"            <span id=\"oa_step_deadline_response\" class=\"date ora-datetime"
-"\" data-datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"            <span id=\"oa_step_deadline_response\" class=\"date ora-"
+"datetime\" data-datetime=\"%(start_date)s\" data-string=\"available {date} "
+"(in %(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1326,10 +1326,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"            <span id=\"oa_step_deadline_response\" class=\"date ora-datetime"
-"\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"            <span id=\"oa_step_deadline_response\" class=\"date ora-"
+"datetime\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
@@ -1554,8 +1554,9 @@ msgstr ""
 #: templates/openassessmentblock/response/oa_response.html:314
 msgid ""
 "\n"
-"                  Learn more about team assignments here: (<a target=\"_blank"
-"\" href=\"https://support.edx.org/hc/en-us/articles/360000191067-Submit-your-"
+"                  Learn more about team assignments here: (<a "
+"target=\"_blank\" href=\"https://support.edx.org/hc/en-us/"
+"articles/360000191067-Submit-your-"
 "response#h_01FVD8SXM9E5H2DNAG87X25ZHR\">link</a>)\n"
 "                  "
 msgstr ""
@@ -1691,10 +1692,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"               <span id=\"oa_step_deadline_self\" class=\"date ora-datetime"
-"\" data-datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"               <span id=\"oa_step_deadline_self\" class=\"date ora-"
+"datetime\" data-datetime=\"%(start_date)s\" data-string=\"available {date} "
+"(in %(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "           "
 msgstr ""
 
@@ -1703,10 +1704,10 @@ msgstr ""
 #, python-format, python-brace-format
 msgid ""
 "\n"
-"               <span id=\"oa_step_deadline_self\" class=\"date ora-datetime"
-"\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"               <span id=\"oa_step_deadline_self\" class=\"date ora-"
+"datetime\" data-datetime=\"%(due_date)s\" data-string=\"due {date} (in "
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "           "
 msgstr ""
 
@@ -2124,8 +2125,8 @@ msgid ""
 "\n"
 "            <span id=\"oa_step_deadline\" class=\"date ora-datetime\" data-"
 "datetime=\"%(start_date)s\" data-string=\"available {date} (in "
-"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-language="
-"\"%(user_language)s\"></span>\n"
+"%(time_until)s)\" data-timezone=\"%(user_timezone)s\" data-"
+"language=\"%(user_language)s\"></span>\n"
 "            "
 msgstr ""
 
