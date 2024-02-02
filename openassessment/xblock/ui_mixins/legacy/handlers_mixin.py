@@ -2,8 +2,8 @@
 
 import logging
 
-from openedx_events.learning.data import ORASubmissionData
-from openedx_events.learning.signals import ORA_SUBMISSION_CREATED
+from platform_plugin_turnitin.events.data import ORASubmissionData
+from platform_plugin_turnitin.events.signals import ORA_SUBMISSION_CREATED
 from xblock.core import XBlock
 from submissions import api as submissions_api
 from openassessment.assessment.errors.peer import (
