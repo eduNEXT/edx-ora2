@@ -9,6 +9,7 @@ edx-toggles
 djangorestframework
 Xblock
 edx-opaque-keys
+openedx-events @ git+https://github.com/edunext/openedx-events.git@bav/ora-submission-created-event
 
 django
 django-simple-history
@@ -28,4 +29,3 @@ path.py
 python-dateutil
 pytz
 voluptuous
--e platform-plugin-turnitin @ git+https://github.com/eduNEXT/platform-plugin-turnitin.git@bav/receive-ora-submission-event

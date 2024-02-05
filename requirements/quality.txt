@@ -34,7 +34,6 @@ attrs==23.2.0
     #   jschema-to-python
     #   jsonschema
     #   openedx-events
-    #   platform-plugin-turnitin
     #   referencing
     #   sarif-om
 aws-sam-translator==1.84.0
@@ -154,7 +153,6 @@ cryptography==42.0.2
     # via
     #   -r requirements/test.txt
     #   moto
-    #   pyjwt
     #   sshpubkeys
 ddt==1.0.0
     # via
@@ -180,15 +178,12 @@ django==3.2.23
     #   django-model-utils
     #   django-waffle
     #   djangorestframework
-    #   drf-jwt
     #   edx-django-utils
-    #   edx-drf-extensions
     #   edx-i18n-tools
     #   edx-submissions
     #   edx-toggles
     #   jsonfield
     #   openedx-events
-    #   platform-plugin-turnitin
     #   xblock-sdk
 django-crum==0.7.9
     # via
@@ -207,22 +202,15 @@ django-waffle==4.1.0
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
-    #   edx-drf-extensions
     #   edx-toggles
 djangorestframework==3.14.0
     # via
     #   -r requirements/test.txt
-    #   drf-jwt
-    #   edx-drf-extensions
     #   edx-submissions
 docker==7.0.0
     # via
     #   -r requirements/test.txt
     #   moto
-drf-jwt==1.19.2
-    # via
-    #   -r requirements/test.txt
-    #   edx-drf-extensions
 ecdsa==0.18.0
     # via
     #   -r requirements/test.txt
@@ -231,12 +219,7 @@ ecdsa==0.18.0
 edx-django-utils==5.10.1
     # via
     #   -r requirements/test.txt
-    #   edx-drf-extensions
     #   edx-toggles
-edx-drf-extensions==10.1.0
-    # via
-    #   -r requirements/test.txt
-    #   platform-plugin-turnitin
 edx-i18n-tools==1.3.0
     # via -r requirements/test.txt
 edx-lint==5.3.6
@@ -244,7 +227,6 @@ edx-lint==5.3.6
 edx-opaque-keys[django]==2.5.1
     # via
     #   -r requirements/test.txt
-    #   edx-drf-extensions
     #   edx-opaque-keys
     #   openedx-events
 edx-submissions==3.6.0
@@ -412,10 +394,8 @@ newrelic==9.6.0
     # via
     #   -r requirements/test.txt
     #   edx-django-utils
-openedx-events==9.4.0
-    # via
-    #   -r requirements/test.txt
-    #   platform-plugin-turnitin
+openedx-events @ git+https://github.com/edunext/openedx-events.git@bav/ora-submission-created-event
+    # via -r requirements/test.txt
 packaging==23.2
     # via
     #   -r requirements/test.txt
@@ -475,11 +455,11 @@ pycparser==2.21
     # via
     #   -r requirements/test.txt
     #   cffi
-pydantic==2.6.0
+pydantic==2.6.1
     # via
     #   -r requirements/test.txt
     #   aws-sam-translator
-pydantic-core==2.16.1
+pydantic-core==2.16.2
     # via
     #   -r requirements/test.txt
     #   pydantic
@@ -582,9 +562,7 @@ requests==2.31.0
     #   -r requirements/test.txt
     #   cookiecutter
     #   docker
-    #   edx-drf-extensions
     #   moto
-    #   platform-plugin-turnitin
     #   python-swiftclient
     #   responses
     #   xblock-sdk
@@ -613,10 +591,6 @@ sarif-om==1.0.4
     # via
     #   -r requirements/test.txt
     #   cfn-lint
-semantic-version==2.10.0
-    # via
-    #   -r requirements/test.txt
-    #   edx-drf-extensions
 simplejson==3.19.2
     # via
     #   -r requirements/test.txt
