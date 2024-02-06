@@ -9,7 +9,7 @@ edx-toggles
 djangorestframework
 Xblock
 edx-opaque-keys
-openedx-events @ git+https://github.com/edunext/openedx-events.git@bav/ora-submission-created-event
+openedx-events @ git+https://github.com/edunext/openedx-events.git@9.4.0/edues
 
 django
 django-simple-history
