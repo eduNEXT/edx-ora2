@@ -10,6 +10,7 @@ djangorestframework
 Xblock
 edx-opaque-keys
 openedx-events @ git+https://github.com/edunext/openedx-events.git@9.4.0/edues
+openedx-filters @ git+https://github.com/edunext/openedx-filters.git@1.6.0/edues
 
 django
 django-simple-history

@@ -42,13 +42,13 @@ bleach==6.1.0
     # via -r requirements/base.txt
 boto==2.49.0
     # via moto
-boto3==1.34.35
+boto3==1.34.36
     # via
     #   -r requirements/base.txt
     #   aws-sam-translator
     #   fs-s3fs
     #   moto
-botocore==1.34.35
+botocore==1.34.36
     # via
     #   -r requirements/base.txt
     #   aws-xray-sdk
@@ -133,6 +133,7 @@ distlib==0.3.8
     #   edx-toggles
     #   jsonfield
     #   openedx-events
+    #   openedx-filters
     #   xblock-sdk
 django-crum==0.7.9
     # via
@@ -180,7 +181,7 @@ exceptiongroup==1.2.0
     # via pytest
 factory-boy==3.3.0
     # via -r requirements/test.in
-faker==22.7.0
+faker==23.1.0
     # via factory-boy
 fastavro==1.9.3
     # via
@@ -301,6 +302,8 @@ newrelic==9.6.0
     #   -r requirements/base.txt
     #   edx-django-utils
 openedx-events @ git+https://github.com/edunext/openedx-events.git@9.4.0/edues
+    # via -r requirements/base.txt
+openedx-filters @ git+https://github.com/edunext/openedx-filters.git@1.6.0/edues
     # via -r requirements/base.txt
 packaging==23.2
     # via
