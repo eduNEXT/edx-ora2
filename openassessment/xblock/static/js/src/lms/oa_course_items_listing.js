@@ -70,7 +70,7 @@ export class CourseItemsListingView {
         });
         // Remove this in AU-617
         const teamAssignment = this.model.get('team_assignment');
-        if (hasAssessmentType && !teamAssignment) {
+        if (hasAssessmentType && !teamAssignment && esgRootUrl) {
           this.$el.append(link);
         }
         return this;
