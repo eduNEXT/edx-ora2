@@ -46,6 +46,8 @@ export class EditSettingsView {
     this.validationErrors = this.validationErrors.bind(this);
     this.clearValidationErrors = this.clearValidationErrors.bind(this);
     this.allowLearnerResubmissions = this.allowLearnerResubmissions.bind(this);
+    this.resubmissionsGracePeriodHoursNum = this.resubmissionsGracePeriodHoursNum.bind(this);
+    this.resubmissionsGracePeriodMinsNum = this.resubmissionsGracePeriodMinutesNum.bind(this);
 
     new SelectControl(
       $('#openassessment_submission_file_upload_response', this.element),
@@ -70,6 +72,21 @@ export class EditSettingsView {
       new Notifier([new AssessmentToggleListener()]),
     ).install();
 
+    new SelectControl(
+      $('#openassessment_allow_learner_resubmissions_selector', this.element),
+      (selectedValue) => {
+        selectedValue = parseInt(selectedValue);
+        const el = $('#openassessment_resubmissions_grace_period_wrapper', this.element);
+
+        if (!selectedValue) {
+          el.addClass('is--hidden');
+        } else {
+          el.removeClass('is--hidden');
+        }
+      },
+      new Notifier([new AssessmentToggleListener()]),
+    ).install();
+
     this.teamsEnabledSelectControl = new SelectControl(
       $('#openassessment_team_enabled_selector', this.element),
       this.onTeamsEnabledChange,
@@ -81,6 +98,16 @@ export class EditSettingsView {
     this.leaderboardIntField = new IntField(
       $('#openassessment_leaderboard_editor', this.element),
       { min: 0, max: 100 },
+    );
+
+    this.resubmissionsGracePeriodHoursIntField = new IntField(
+      $('#openassessment_resubmissions_grace_period_hours', this.element),
+      { min: 0, max: 59 },
+    );
+
+    this.resubmissionsGracePeriodMinutesIntField = new IntField(
+      $('#openassessment_resubmissions_grace_period_minutes', this.element),
+      { min: 0 },
     );
 
     this.fileTypeWhiteListInputField = new InputControl(
@@ -265,6 +292,7 @@ export class EditSettingsView {
     return sel.val();
   }
 
+
   /**
     Get or set upload file type.
 
@@ -430,6 +458,41 @@ export class EditSettingsView {
       this.leaderboardIntField.set(num);
     }
     return this.leaderboardIntField.get(num);
+  }
+
+
+  /**
+    Get or set the number of hours to allow resubmissions to learners.
+
+    Args:
+        num (int, optional)
+
+    Returns:
+        int
+
+    * */
+  resubmissionsGracePeriodHoursNum(num) {
+    if (num !== undefined) {
+      this.resubmissionsGracePeriodHoursIntField.set(num);
+    }
+    return this.resubmissionsGracePeriodHoursIntField.get(num);
+  }
+
+  /**
+    Get or set the number of minutes to allow resubmissions to learners.
+
+    Args:
+        num (int, optional)
+
+    Returns:
+        int
+
+    * */
+  resubmissionsGracePeriodMinutesNum(num) {
+    if (num !== undefined) {
+      this.resubmissionsGracePeriodMinutesIntField.set(num);
+    }
+    return this.resubmissionsGracePeriodMinutesIntField.get(num);
   }
 
   /**

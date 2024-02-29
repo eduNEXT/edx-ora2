@@ -17,6 +17,8 @@ class ORAConfigAPI:
         "leaderboard_show",
         "prompt",
         "prompts_type",
+        "resubmissions_grace_period_hours",
+        "resubmissions_grace_period_minutes",
         "rubric_criteria",
         "rubric_feedback_prompt",
         "rubric_feedback_default_text",

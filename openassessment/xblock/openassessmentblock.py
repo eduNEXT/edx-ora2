@@ -189,6 +189,18 @@ class OpenAssessmentBlock(
         help="The type of prompt. html or text"
     )
 
+    resubmissions_grace_period_hours = Integer(
+        default=0,
+        scope=Scope.content,
+        help="The number of hours after the submission due date that resubmissions are allowed."
+    )
+
+    resubmissions_grace_period_minutes = Integer(
+        default=0,
+        scope=Scope.content,
+        help="The number of minutes after the submission due date that resubmissions are allowed."
+    )
+
     rubric_criteria = List(
         default=DEFAULT_RUBRIC_CRITERIA,
         scope=Scope.content,
@@ -928,6 +940,8 @@ class OpenAssessmentBlock(
         block.leaderboard_show = config['leaderboard_show']
         block.prompts = config['prompts']
         block.prompts_type = config['prompts_type']
+        block.resubmissions_grace_period_hours = config['resubmissions_grace_period_hours']
+        block.resubmissions_grace_period_minutes = config['resubmissions_grace_period_minutes']
         block.rubric_criteria = config['rubric_criteria']
         block.rubric_feedback_prompt = config['rubric_feedback_prompt']
         block.rubric_feedback_default_text = config['rubric_feedback_default_text']

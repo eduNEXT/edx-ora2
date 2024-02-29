@@ -194,6 +194,8 @@ class StudioMixin:
             'white_listed_file_types': white_listed_file_types_string,
             'allow_latex': self.allow_latex,
             'allow_learner_resubmissions': self.allow_learner_resubmissions,
+            'resubmissions_grace_period_hours': self.resubmissions_grace_period_hours,
+            'resubmissions_grace_period_minutes': self.resubmissions_grace_period_minutes,
             'leaderboard_show': self.leaderboard_show,
             'editor_assessments_order': [
                 make_django_template_key(asmnt)
@@ -233,7 +235,6 @@ class StudioMixin:
         Returns:
             dict with keys 'success' (bool) and 'msg' (str)
         """
-
         # Validate and sanitize the data using a schema
         # If the data is invalid, this means something is wrong with
         # our JavaScript, so we log an exception.
@@ -316,6 +317,8 @@ class StudioMixin:
         self.allow_multiple_files = bool(data['allow_multiple_files'])
         self.allow_latex = bool(data['allow_latex'])
         self.allow_learner_resubmissions = bool(data['allow_learner_resubmissions'])
+        self.resubmissions_grace_period_hours = data['resubmissions_grace_period_hours']
+        self.resubmissions_grace_period_minutes = data['resubmissions_grace_period_minutes']
         self.leaderboard_show = data['leaderboard_show']
         self.teams_enabled = bool(data.get('teams_enabled', False))
         self.selected_teamset_id = data.get('selected_teamset_id', '')
