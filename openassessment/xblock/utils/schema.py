@@ -123,6 +123,7 @@ EDITOR_UPDATE_SCHEMA = Schema({
     'white_listed_file_types': utf8_validator,
     Required('allow_multiple_files'): bool,
     Required('allow_latex'): bool,
+    Required('allow_learner_resubmissions'): bool,
     Required('leaderboard_show'): int,
     Optional('teams_enabled'): bool,
     Optional('selected_teamset_id'): utf8_validator,

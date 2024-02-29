@@ -135,6 +135,12 @@ class OpenAssessmentBlock(
         help="Allow multiple files uploaded with submission (if file upload enabled)."
     )
 
+    allow_learner_resubmissions = Boolean(
+        default=True,
+        scope=Scope.settings,
+        help="Allow learners to resubmit their response."
+    )
+
     date_config_type = String(
         default=DATE_CONFIG_MANUAL,
         scope=Scope.settings,
@@ -914,6 +920,7 @@ class OpenAssessmentBlock(
 
         block.allow_file_upload = config['allow_file_upload']
         block.allow_latex = config['allow_latex']
+        block.allow_learner_resubmissions = config['allow_learner_resubmissions']
         block.allow_multiple_files = config['allow_multiple_files']
         block.file_upload_response = config['file_upload_response']
         block.file_upload_type = config['file_upload_type']

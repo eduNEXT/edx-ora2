@@ -45,6 +45,7 @@ export class EditSettingsView {
     this.validate = this.validate.bind(this);
     this.validationErrors = this.validationErrors.bind(this);
     this.clearValidationErrors = this.clearValidationErrors.bind(this);
+    this.allowLearnerResubmissions = this.allowLearnerResubmissions.bind(this);
 
     new SelectControl(
       $('#openassessment_submission_file_upload_response', this.element),
@@ -441,6 +442,18 @@ export class EditSettingsView {
      * */
   showRubricDuringResponse(isEnabled) {
     return this.settingSelectorEnabled('#openassessment_show_rubric_during_response_selector', isEnabled);
+  }
+
+  /**
+    Enable / disable allowing learners to resubmit their assessment.
+
+    Args:
+        isEnabled(boolean, optional): if provided enable/disable allowing resubmissions
+    Returns:
+        boolean
+     * */
+  allowLearnerResubmissions(isEnabled) {
+    return this.settingSelectorEnabled('#openassessment_allow_learner_resubmissions_selector', isEnabled);
   }
 
   /**

@@ -474,6 +474,7 @@ export class Server {
       teams_enabled: options.teamsEnabled,
       selected_teamset_id: options.selectedTeamsetId,
       show_rubric_during_response: options.showRubricDuringResponse,
+      allow_learner_resubmissions: options.allowLearnerResubmissions,
     });
     return $.Deferred((defer) => {
       $.ajax({

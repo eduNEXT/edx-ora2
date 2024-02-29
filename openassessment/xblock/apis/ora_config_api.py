@@ -8,6 +8,7 @@ class ORAConfigAPI:
     XBLOCK_FIELDS = [
         "allow_file_upload",
         "allow_latex",
+        "allow_learner_resubmissions",
         "allow_multiple_files",
         "date_config_type",
         "file_upload_response_raw",
