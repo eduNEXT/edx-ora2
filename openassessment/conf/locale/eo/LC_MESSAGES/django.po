@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-ora2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-03 13:33-0500\n"
+"POT-Creation-Date: 2024-05-02 17:22-0500\n"
 "PO-Revision-Date: 2014-06-04 15:41-0400\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
@@ -402,55 +402,30 @@ msgstr "Àllöw Léärnér Résüßmïssïöns Ⱡ'σяєм ιρѕυм ∂σłσ
 
 #: templates/legacy/edit/oa_edit_basic_settings_list.html
 msgid ""
-"Specify whether learners can reset and resubmit their work within the "
-"timeframe allowed for this the step, as long as there is no peer step, and "
-"it has not yet been graded or is in the process of being graded. When set to"
-" true, it is advisable to inform learners about the specific configuration "
-"the activity has."
+"Set to TRUE to allow learners to resubmit ungraded work. Set to FALSE if "
+"resubmissions are not allowed."
 msgstr ""
-"Spéçïfý whéthér léärnérs çän rését änd résüßmït théïr wörk wïthïn thé "
-"tïméfrämé ällöwéd för thïs thé stép, äs löng äs théré ïs nö péér stép, änd "
-"ït häs nöt ýét ßéén grädéd ör ïs ïn thé pröçéss öf ßéïng grädéd. Whén sét tö"
-" trüé, ït ïs ädvïsäßlé tö ïnförm léärnérs äßöüt thé spéçïfïç çönfïgürätïön "
-"thé äçtïvïtý häs. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт,"
-" ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм "
-"α∂ мιηιм #"
+"Sét tö TRÛÉ tö ällöw léärnérs tö résüßmït üngrädéd wörk. Sét tö FÀLSÉ ïf "
+"résüßmïssïöns äré nöt ällöwéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
 #: templates/legacy/edit/oa_edit_basic_settings_list.html
-msgid "Grace Period Days"
-msgstr "Gräçé Pérïöd Däýs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
-
-#: templates/legacy/edit/oa_edit_basic_settings_list.html
-msgid "You can specify a maximum days for resets to be allowed."
-msgstr ""
-"Ýöü çän spéçïfý ä mäxïmüm däýs för réséts tö ßé ällöwéd. Ⱡ'σяєм ιρѕυм ∂σłσя "
-"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: templates/legacy/edit/oa_edit_basic_settings_list.html
-msgid "Grace Period Time"
-msgstr "Gräçé Pérïöd Tïmé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+msgid "Resubmission Grace Period"
+msgstr "Résüßmïssïön Gräçé Pérïöd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: templates/legacy/edit/oa_edit_basic_settings_list.html
 msgid ""
-"You can specify a maximum time (hours and minutes) for resets to be allowed."
+"Specify the maximum period during which resubmissions are allowed. If left "
+"blank, learners will be able to reset their submission as long as it has not"
+" been graded."
 msgstr ""
-"Ýöü çän spéçïfý ä mäxïmüm tïmé (höürs änd mïnütés) för réséts tö ßé ällöwéd."
-" Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
-
-#: templates/legacy/edit/oa_edit_basic_settings_list.html
-msgid ""
-"If both grace period fields are set to 0 (by default), the grace period is "
-"disabled and learners will be able to reset their submissions as long as "
-"they have not been graded."
-msgstr ""
-"Ìf ßöth gräçé pérïöd fïélds äré sét tö 0 (ßý défäült), thé gräçé pérïöd ïs "
-"dïsäßléd änd léärnérs wïll ßé äßlé tö rését théïr süßmïssïöns äs löng äs "
-"théý hävé nöt ßéén grädéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
-"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
-" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
-"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
-"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
-"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα#"
+"Spéçïfý thé mäxïmüm pérïöd dürïng whïçh résüßmïssïöns äré ällöwéd. Ìf léft "
+"ßlänk, léärnérs wïll ßé äßlé tö rését théïr süßmïssïön äs löng äs ït häs nöt"
+" ßéén grädéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂"
+" ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ "
+"мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ "
+"єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє "
+"νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт "
+"¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂#"
 
 #: templates/legacy/edit/oa_edit_criterion.html
 #: templates/legacy/staff_area/oa_student_info.html

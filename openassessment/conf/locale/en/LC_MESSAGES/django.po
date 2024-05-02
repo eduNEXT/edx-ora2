@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-ora2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-03 13:33-0500\n"
+"POT-Creation-Date: 2024-05-02 17:22-0500\n"
 "PO-Revision-Date: 2014-06-04 15:41-0400\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
@@ -339,35 +339,19 @@ msgstr ""
 
 #: templates/legacy/edit/oa_edit_basic_settings_list.html:174
 msgid ""
-"Specify whether learners can reset and resubmit their work within the "
-"timeframe allowed for this the step, as long as there is no peer step, and "
-"it has not yet been graded or is in the process of being graded. When set to "
-"true, it is advisable to inform learners about the specific configuration "
-"the activity has."
+"Set to TRUE to allow learners to resubmit ungraded work. Set to FALSE if "
+"resubmissions are not allowed."
 msgstr ""
 
 #: templates/legacy/edit/oa_edit_basic_settings_list.html:178
-msgid "Grace Period Days"
+msgid "Resubmission Grace Period"
 msgstr ""
 
 #: templates/legacy/edit/oa_edit_basic_settings_list.html:187
-msgid "You can specify a maximum days for resets to be allowed."
-msgstr ""
-
-#: templates/legacy/edit/oa_edit_basic_settings_list.html:189
-msgid "Grace Period Time"
-msgstr ""
-
-#: templates/legacy/edit/oa_edit_basic_settings_list.html:198
 msgid ""
-"You can specify a maximum time (hours and minutes) for resets to be allowed."
-msgstr ""
-
-#: templates/legacy/edit/oa_edit_basic_settings_list.html:202
-msgid ""
-"If both grace period fields are set to 0 (by default), the grace period is "
-"disabled and learners will be able to reset their submissions as long as "
-"they have not been graded."
+"Specify the maximum period during which resubmissions are allowed. If left "
+"blank, learners will be able to reset their submission as long as it has not "
+"been graded."
 msgstr ""
 
 #: templates/legacy/edit/oa_edit_criterion.html:6
@@ -2372,15 +2356,15 @@ msgstr ""
 msgid "Self Assessment to Staff Assessment"
 msgstr ""
 
-#: xblock/openassessmentblock.py:1374
+#: xblock/openassessmentblock.py:1367
 msgid "The user does not exist."
 msgstr ""
 
-#: xblock/openassessmentblock.py:1377
+#: xblock/openassessmentblock.py:1370
 msgid "There is no submission to reset."
 msgstr ""
 
-#: xblock/openassessmentblock.py:1379
+#: xblock/openassessmentblock.py:1372
 msgid "Submission reset successfully."
 msgstr ""
 
@@ -2484,30 +2468,30 @@ msgid ""
 "allow the team to resubmit a response."
 msgstr ""
 
-#: xblock/studio_mixin.py:246 xblock/studio_mixin.py:258
+#: xblock/studio_mixin.py:245 xblock/studio_mixin.py:257
 msgid "Error updating XBlock configuration"
 msgstr ""
 
-#: xblock/studio_mixin.py:263
+#: xblock/studio_mixin.py:262
 msgid "Error: Text Response and File Upload Response cannot both be disabled"
 msgstr ""
 
-#: xblock/studio_mixin.py:267
+#: xblock/studio_mixin.py:266
 msgid ""
 "Error: When Text Response is disabled, File Upload Response must be Required"
 msgstr ""
 
-#: xblock/studio_mixin.py:270
+#: xblock/studio_mixin.py:269
 msgid ""
 "Error: When File Upload Response is disabled, Text Response must be Required"
 msgstr ""
 
-#: xblock/studio_mixin.py:294
+#: xblock/studio_mixin.py:293
 #, python-brace-format
 msgid "Validation error: {error}"
 msgstr ""
 
-#: xblock/studio_mixin.py:329
+#: xblock/studio_mixin.py:327
 msgid "Successfully updated OpenAssessment XBlock"
 msgstr ""
 
