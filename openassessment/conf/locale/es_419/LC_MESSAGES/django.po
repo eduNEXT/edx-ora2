@@ -35,7 +35,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-07 15:01-0400\n"
+"POT-Creation-Date: 2024-05-08 17:58-0400\n"
 "PO-Revision-Date: 2014-06-11 13:03+0000\n"
 "Last-Translator: Zimeng Chen, 2023\n"
 "Language-Team: Spanish (Latin America) (http://app.transifex.com/open-edx/"
@@ -420,11 +420,13 @@ msgstr "Período de Gracia para Reenvíos"
 msgid ""
 "Specify the maximum period during which resubmissions are allowed. If left "
 "blank, learners will be able to reset their submission as long as it has not "
-"been graded."
+"been graded. The grace period starts once the learner has submitted their "
+"response."
 msgstr ""
 "Especifica el período máximo durante el cual se permiten los reenvíos. Si se "
 "deja en blanco, los estudiantes podrán restablecer su envío siempre y cuando "
-"no haya sido calificado."
+"no haya sido calificado. El período de gracia comienza una vez que el "
+"estudiante ha enviado su respuesta."
 
 #: templates/legacy/edit/oa_edit_criterion.html:6
 #: templates/legacy/staff_area/oa_student_info.html:122
@@ -1959,7 +1961,7 @@ msgstr ""
 msgid "We could not submit your response"
 msgstr "No pudimos subir su respuesta"
 
-#: templates/legacy/response/oa_response.html:332
+#: templates/legacy/response/oa_response.html:333
 msgid "Submit your response and move to the next step"
 msgstr "Publique su respuesta y continúe con el siguiente paso"
 
@@ -2865,15 +2867,19 @@ msgstr "Auto Evaluación a Evaluación Par"
 msgid "Self Assessment to Staff Assessment"
 msgstr "Auto Evaluación a Evaluación del Personal"
 
-#: xblock/openassessmentblock.py:1367
+#: xblock/openassessmentblock.py:1358
+msgid "You can't reset your submission."
+msgstr "No puedes restablecer tu envío."
+
+#: xblock/openassessmentblock.py:1371
 msgid "The user does not exist."
 msgstr "El usuario no existe."
 
-#: xblock/openassessmentblock.py:1370
+#: xblock/openassessmentblock.py:1374
 msgid "There is no submission to reset."
 msgstr "No hay envío para restablecer."
 
-#: xblock/openassessmentblock.py:1372
+#: xblock/openassessmentblock.py:1376
 msgid "Submission reset successfully."
 msgstr "Envío restablecido con éxito."
 
